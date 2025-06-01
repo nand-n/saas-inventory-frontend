@@ -12,15 +12,27 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAsync } from "@/hooks/useAsync";
 import { InventoryItem } from "@/types/inventory";
 import ItemList from "./_components/item-list";
+import useConfigurationStore from "@/store/tenant/configurationStore";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ChartOfAccount } from "../coa/page";
 
 interface CartItem {
   id: string;
   name: string;
-  price: number;
   quantity: number;
+  unitPrice: number;
+  unitCost: number;
 }
 
 const SalesPage = () => {
+  const { paymentConfiguration } = useConfigurationStore();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("");
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -47,6 +59,35 @@ const SalesPage = () => {
         .then((res) => res.data),
     true
   );
+  const {
+    data: coas = [],
+    loading: coaLoading,
+    execute: fetchCoas,
+  } = useAsync(
+    () =>
+      axiosInstance.get("/accounting/chart-of-accounts").then((r) => r.data),
+    true
+  );
+
+  interface FormDataType {
+    cogsAccountId: string;
+    salesRevenueAccountId: string;
+    cashAccountId: string;
+    inventoryAccountId: string;
+    lines: {
+      productId: string;
+      quantity: number;
+      price: number;
+    }[];
+  }
+
+  const [formData, setFormData] = useState({
+    cogsAccountId: "",
+    salesRevenueAccountId: "",
+    cashAccountId: "",
+    inventoryAccountId: "",
+    lines: [],
+  });
 
   // Group items by category with search filter
   const itemsByCategory = useMemo<Record<string, InventoryItem[]>>(() => {
@@ -74,7 +115,7 @@ const SalesPage = () => {
   }, [itemsByCategory, activeCategory]);
 
   // Handle sell action
-  const handleSell = (item: InventoryItem) => {
+  const updateCart = (item: InventoryItem) => {
     // Update cart
     setCart((prev) => {
       const existing = prev.find((i) => i.id === item.id);
@@ -88,33 +129,43 @@ const SalesPage = () => {
         {
           id: item.id,
           name: item.item_name,
-          price: Number(item.unit_price),
+          unitPrice: Number(item.unit_price),
+          unitCost: Number(item.unit_cost),
+
           quantity: 1,
         },
       ];
     });
-
-    // Update inventory (optimistic update)
-    // axiosInstance
-    //   .patch(`/inventory/inventory-items/${item.id}`, {
-    //     quantity: Math.max(0, item.quantity - 1),
-    //   })
-    //   .then(() => fetchInventoryItems());
   };
 
-  const handleComplateSale = () => {
-    cart.map((item) => {
-      axiosInstance
-        .patch(`/inventory/inventory-items/${item.id}`, {
-          quantity: Math.max(0, item.quantity - 1),
-        })
-        .then(() => fetchInventoryItems());
-    });
+  const handleCompleteSale = async () => {
+    if (cart.length === 0) return;
+
+    try {
+      const salePayload = {
+        ...formData,
+        lines: cart.map((item) => ({
+          itemId: item.id,
+          qty: item.quantity,
+          unitPrice: item.unitPrice,
+          unitCost: item.unitCost,
+        })),
+      };
+
+      // 1. Submit the sale
+      await axiosInstance.post("/pos/sale", salePayload);
+
+      // 3. Clear cart and refresh
+      setCart([]);
+      fetchInventoryItems();
+    } catch (error) {
+      console.error("Sale failed:", error);
+    }
   };
 
   // Calculate total
   const totalAmount = useMemo(() => {
-    return cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   }, [cart]);
 
   // Category tabs
@@ -127,9 +178,9 @@ const SalesPage = () => {
   }, [itemsByCategory]);
 
   return (
-    <div className="flex h-screen gap-4 p-4">
+    <div className="flex flex-col lg:flex-row h-auto min-h-screen gap-4 p-4">
       {/* Product Catalog */}
-      <div className="flex-1">
+      <div className="w-full lg:flex-1">
         <div className="mb-4 flex gap-4">
           <Input
             placeholder="Search products..."
@@ -140,7 +191,7 @@ const SalesPage = () => {
         </div>
 
         <Tabs value={activeCategory} onValueChange={setActiveCategory}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
             {categoryTabs.map((tab) => (
               <TabsTrigger
                 key={tab.value}
@@ -153,36 +204,11 @@ const SalesPage = () => {
             ))}
           </TabsList>
 
-          <ScrollArea className="h-[calc(100vh-180px)]">
+          <ScrollArea className="max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-180px)]">
             {Object.entries(itemsByCategory).map(([category, items]) => (
               <TabsContent key={category} value={category} className="mt-4">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {/* {items.map((item) => (
-                    <Card
-                      key={item.id}
-                      className="p-4 flex flex-col justify-between"
-                    >
-                      <div>
-                        <h3 className="font-medium">{item.item_name}</h3>
-                        <p className="text-sm text-gray-500">
-                          ${item.unit_price}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Stock: {item.quantity}
-                        </p>
-                      </div>
-                      <Button
-                        size="sm"
-                        className="mt-2 w-full"
-                        onClick={() => handleSell(item)}
-                        disabled={item.quantity === 0}
-                      >
-                        {item.quantity > 0 ? "Sell" : "Out of Stock"}
-                      </Button>
-                    </Card>
-                  ))} */}
-
-                  <ItemList handleSell={handleSell} items={items} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  <ItemList updateCart={updateCart} items={items} />
                 </div>
               </TabsContent>
             ))}
@@ -191,13 +217,125 @@ const SalesPage = () => {
       </div>
 
       {/* Cart Summary */}
-      <div className="w-96 border-l p-4">
+      <div className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l p-4">
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Current Sale</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            {/* ACCOUNT SELECTION */}
+            <div className="space-y-4 border-t pt-4">
+              {/* Inventory Account */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Inventory Account</label>
+                <Select
+                  value={formData.inventoryAccountId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, inventoryAccountId: value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Inventory Account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coas
+                      ?.filter(
+                        (item: { code: ChartOfAccount }) =>
+                          Number(item.code) >= 1000 && Number(item.code) < 2000
+                      )
+                      .map((coa: ChartOfAccount) => (
+                        <SelectItem key={coa.id} value={coa.id ?? ""}>
+                          {coa.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* COGS Account */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">COGS Account</label>
+                <Select
+                  value={formData.cogsAccountId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, cogsAccountId: value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="COGS Account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coas
+                      ?.filter(
+                        (item: ChartOfAccount) =>
+                          Number(item.code) >= 5000 && Number(item.code) < 6000
+                      )
+                      .map((coa: ChartOfAccount) => (
+                        <SelectItem key={coa.id} value={coa.id ?? ""}>
+                          {coa.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Sales Revenue Account */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">
+                  Sales Revenue Account
+                </label>
+                <Select
+                  value={formData.salesRevenueAccountId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, salesRevenueAccountId: value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Sales Revenue Account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coas
+                      ?.filter(
+                        (item: ChartOfAccount) =>
+                          Number(item.code) >= 4000 && Number(item.code) < 5000
+                      )
+                      .map((coa: ChartOfAccount) => (
+                        <SelectItem key={coa.id} value={coa.id ?? ""}>
+                          {coa.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Cash or Account Payable */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">{"Cash Account"}</label>
+                <Select
+                  value={formData.cashAccountId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, cashAccountId: value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={"Cash Account"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {coas
+                      ?.filter(
+                        (item: ChartOfAccount) =>
+                          Number(item.code) >= 1000 && Number(item.code) < 2000
+                      )
+                      .map((coa: ChartOfAccount) => (
+                        <SelectItem key={coa.id} value={coa.id ?? ""}>
+                          {coa.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-4 border-t-2 mt-4 pt-4">
               {cart.map((item) => (
                 <div
                   key={item.id}
@@ -206,7 +344,8 @@ const SalesPage = () => {
                   <div>
                     <p className="font-medium">{item.name}</p>
                     <p className="text-sm text-gray-500">
-                      {item.quantity} × ${item.price}
+                      {item.quantity} × {paymentConfiguration?.currency}{" "}
+                      {item.unitPrice}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -230,9 +369,20 @@ const SalesPage = () => {
               <div className="border-t pt-4">
                 <div className="flex justify-between font-medium">
                   <span>Total:</span>
-                  <span>${totalAmount.toFixed(2)}</span>
+                  <span>
+                    {paymentConfiguration?.currency} {totalAmount.toFixed(2)}
+                  </span>
                 </div>
-                <Button onClick={handleComplateSale} className="w-full mt-4">
+                <Button
+                  disabled={
+                    formData.cashAccountId == "" ||
+                    formData.cogsAccountId == "" ||
+                    formData.inventoryAccountId == "" ||
+                    formData.salesRevenueAccountId == ""
+                  }
+                  onClick={handleCompleteSale}
+                  className="w-full my-4"
+                >
                   Complete Sale
                 </Button>
               </div>

@@ -36,10 +36,12 @@ const InventoryPage = () => {
     item_name: "",
     sku: "",
     unit_price: 0,
+    unit_cost: 0,
     reorder_level: 0,
     category_id: "",
     quantity: 0,
     branch_id: "",
+    inventory_account_id: "",
   });
 
   const [stockTransferData, setStockTransferData] = useState({
@@ -106,6 +108,16 @@ const InventoryPage = () => {
     true
   );
 
+  const {
+    data: coas = [],
+    loading: coaLoading,
+    execute: fetchCoas,
+  } = useAsync(
+    () =>
+      axiosInstance.get("/accounting/chart-of-accounts").then((r) => r.data),
+    true
+  );
+
   const refresh = () => {
     fetchInventoryItems();
     fetchSummary();
@@ -139,10 +151,12 @@ const InventoryPage = () => {
         item_name: "",
         sku: "",
         unit_price: 0,
+        unit_cost: 0,
         branch_id: "",
         reorder_level: 0,
         category_id: "",
         quantity: 0,
+        inventory_account_id: "",
       });
       refresh();
     } catch (error) {
@@ -197,6 +211,16 @@ const InventoryPage = () => {
     {
       accessorKey: "sku",
       header: "SKU",
+      cell: ({ row }) => (
+        <div className="flex justify-start items-center gap-2">
+          <QRCode
+            value={row.getValue("sku")}
+            size={80}
+            className="border p-2 rounded-lg h-full"
+          />
+          <span className="font-bold text-lg ">{row.getValue("sku")}</span>
+        </div>
+      ),
     },
     {
       id: "actions",
@@ -214,10 +238,13 @@ const InventoryPage = () => {
                   item_name: item.item_name,
                   sku: item.sku,
                   unit_price: Number(item.unit_price),
+                  unit_cost: Number(item.unit_cost),
+
                   reorder_level: Number(item.reorder_level),
                   category_id: item.category_id,
                   quantity: Number(item.quantity),
                   branch_id: item.branch_id,
+                  inventory_account_id: "",
                 });
                 setIsModalOpen(true);
               }}
@@ -370,9 +397,11 @@ const InventoryPage = () => {
                 sku: "",
                 branch_id: "",
                 unit_price: 0,
+                unit_cost: 0,
                 reorder_level: 0,
                 category_id: "",
                 quantity: 0,
+                inventory_account_id: "",
               });
               setIsModalOpen(true);
             }}
@@ -452,6 +481,7 @@ const InventoryPage = () => {
         handleGenerateSKU={handleGenerateSKU}
         inventoryCategories={inventoryCategories}
         branches={branches}
+        coas={coas}
       />
 
       <StockTransferModal

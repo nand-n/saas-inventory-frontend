@@ -1,3 +1,4 @@
+import { ChartOfAccount } from "./accounting.type";
 import { Branch } from "./branchTypes.type";
 import { BaseEntity } from "./common.type";
 
@@ -7,10 +8,14 @@ export interface InventoryItem extends BaseEntity {
   item_name: string;
   sku: string;
   unit_price: string;
+  unit_cost: string;
   reorder_level: string;
   category_id: string;
-  branch_id: string 
+  branch_id: string;
   image?: string;
+  inventoryAccount?: ChartOfAccount;
+  cogsAccount?: ChartOfAccount;
+  revenueAccount?: ChartOfAccount;
 }
 
 // Inventory Category interface
@@ -45,16 +50,18 @@ export interface StockAdjustment extends BaseEntity {
   approved_by_id: string;
 }
 
-
 export interface StockTransfer extends BaseEntity {
   source_branch_id: string;
   destination_branch_id: string;
   item_id: string;
   quantity: number;
-  status: 'Pending' | 'Completed' | 'Rejected'; // or simply `string` if dynamic
+  status: "Pending" | "Completed" | "Rejected"; // or simply `string` if dynamic
 }
-  
-  // Optional: Types for inventory filters
-  export type InventoryStatus = 'all' | 'in-stock' | 'low-stock' | 'out-of-stock'
-  export type SortDirection = 'asc' | 'desc'
-  export type SortField = keyof Omit<InventoryItem, 'id' | 'image' | 'description'>
+
+// Optional: Types for inventory filters
+export type InventoryStatus = "all" | "in-stock" | "low-stock" | "out-of-stock";
+export type SortDirection = "asc" | "desc";
+export type SortField = keyof Omit<
+  InventoryItem,
+  "id" | "image" | "description"
+>;

@@ -4,18 +4,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Minus } from "lucide-react";
 import { InventoryItem } from "@/types/inventory";
+import useConfigurationStore from "@/store/tenant/configurationStore";
 
 interface ItemListProps {
   items: InventoryItem[];
-  handleSell: (item: InventoryItem) => void;
+  updateCart: (item: InventoryItem) => void;
 }
 
-const ItemList = ({ items, handleSell }: ItemListProps) => {
+const ItemList = ({ items, updateCart }: ItemListProps) => {
   const [quantities, setQuantities] = useState<Record<string | number, number>>(
     {}
   );
+  const { paymentConfiguration } = useConfigurationStore();
 
-  console.log(quantities[items[2].id], " quantities");
   const handleIncrease = (item: InventoryItem) => {
     setQuantities((prev) => {
       const current = prev[item.id] || 0;
@@ -46,10 +47,15 @@ const ItemList = ({ items, handleSell }: ItemListProps) => {
   return (
     <>
       {items.map((item) => (
-        <Card key={item.id} className="p-4 flex flex-col justify-between gap-2">
+        <Card
+          key={item.id}
+          className="p-4 min-w-[190px]  flex flex-col justify-between gap-2"
+        >
           <div>
             <h3 className="font-medium">{item.item_name}</h3>
-            <p className="text-sm text-gray-500">${item.unit_price}</p>
+            <p className="text-sm text-gray-500">
+              {paymentConfiguration?.currency} {item.unit_price}
+            </p>
             <p className="text-xs text-muted-foreground">
               Stock: {item.quantity}
             </p>
@@ -66,9 +72,9 @@ const ItemList = ({ items, handleSell }: ItemListProps) => {
             </Button>
             <Input
               type="number"
-              min={0}
+              min={1}
               max={item.quantity}
-              value={quantities[item.id] || 0}
+              value={quantities[item.id] || 1}
               onChange={(e) => handleInputChange(item, e.target.value)}
               className="w-16 text-center"
             />
@@ -77,7 +83,7 @@ const ItemList = ({ items, handleSell }: ItemListProps) => {
               size="icon"
               variant="outline"
               onClick={() => handleIncrease(item)}
-              disabled={(quantities[item.id] || 0) >= item.quantity}
+              disabled={quantities[item.id] >= item.quantity}
             >
               <Plus className="w-4 h-4" />
             </Button>
@@ -86,10 +92,10 @@ const ItemList = ({ items, handleSell }: ItemListProps) => {
           <Button
             size="sm"
             className="w-full"
-            onClick={() => handleSell(item)}
-            disabled={item.quantity === 0 || (quantities[item.id] || 0) === 0}
+            onClick={() => updateCart(item)}
+            disabled={item.quantity === 0 || (quantities[item.id] || 1) === 0}
           >
-            {item.quantity > 0 ? "Sell" : "Out of Stock"}
+            {item.quantity > 0 ? "Add To Cart" : "Out of Stock"}
           </Button>
         </Card>
       ))}

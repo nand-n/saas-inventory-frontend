@@ -34,18 +34,18 @@
 
 // export default Modal;
 
-import React from 'react';
-import { 
-  ModalClose, 
-  ModalContent, 
-  ModalDescription, 
-  ModalFooter, 
-  ModalHeader, 
-  ModalProvider, 
-  ModalTitle, 
-  ModalTrigger
-} from '../modal';
-import { Button } from '../button';
+import React from "react";
+import {
+  ModalClose,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalProvider,
+  ModalTitle,
+  ModalTrigger,
+} from "../modal";
+import { Button } from "../button";
 
 interface ModalProps {
   title: string;
@@ -58,29 +58,29 @@ interface ModalProps {
   onOpenChange?: (open: boolean) => void;
 }
 
-const Modal: React.FC<ModalProps> = ({ 
-  title, 
-  description, 
-  children, 
-  onCancel, 
-  onConfirm, 
+const Modal: React.FC<ModalProps> = ({
+  title,
+  description,
+  children,
+  onCancel,
+  onConfirm,
   modalTrigger,
   open,
-  onOpenChange
+  onOpenChange,
 }) => {
   return (
     <ModalProvider open={open} onOpenChange={onOpenChange}>
-      <ModalTrigger asChild>
-        {modalTrigger}
-      </ModalTrigger>
-      <ModalContent>
+      <ModalTrigger asChild>{modalTrigger}</ModalTrigger>
+      <ModalContent className="max-h-3/4 h-full">
         <ModalHeader>
           <ModalTitle>{title}</ModalTitle>
           <ModalDescription>{description}</ModalDescription>
         </ModalHeader>
-        <div>{children}</div>
+        <div className="h-full overflow-auto">{children}</div>
         <ModalFooter>
-          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
           <Button onClick={onConfirm}>Confirm</Button>
         </ModalFooter>
         <ModalClose />
