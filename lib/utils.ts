@@ -32,3 +32,58 @@ export async function runAsync<Args extends Array<any>, ReturnType>(
     return [null, error instanceof Error ? error: new Error(String(error)) ];
   }
 }
+
+
+
+
+export function formatCurrency(amount: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(amount);
+}
+
+export function formatDate(date: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  }).format(new Date(date));
+}
+
+export function formatDateTime(date: string): string {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(date));
+}
+
+export function exportToCSV(data: any[], filename: string): void {
+  const csv = convertToCSV(data);
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function convertToCSV(data: any[]): string {
+  if (!data.length) return '';
+  
+  const headers = Object.keys(data[0]);
+  const csvData = data.map(row => 
+    headers.map(header => {
+      const value = row[header];
+      return typeof value === 'string' ? `"${value}"` : value;
+    }).join(',')
+  );
+  
+  return [headers.join(','), ...csvData].join('\n');
+}

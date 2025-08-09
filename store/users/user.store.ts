@@ -22,6 +22,9 @@ type User = {
 type UserStoreState = User & {
   setUser: (user: User) => void;
   clearUser: () => void;
+  superAdminUser?: User | null;
+   setSuperAdminUser: (user: User) => void;
+  getSuperAdminUser: () => User | null;
 };
 
 const initialState: User = {
@@ -42,10 +45,15 @@ const initialState: User = {
   subscriptionPlan: null,
 };
 
-const useUserStore = create<UserStoreState>((set) => ({
+const useUserStore = create<UserStoreState>((set , get) => ({
   ...initialState,
+ superAdminUser: null,
+
   setUser: (user) => set(() => ({ ...user })),
   clearUser: () => set(initialState),
+
+   setSuperAdminUser: (user) => set(() => ({ superAdminUser: { ...user } })),
+  getSuperAdminUser: () => get().superAdminUser ?? null,
 }));
 
 export default useUserStore;

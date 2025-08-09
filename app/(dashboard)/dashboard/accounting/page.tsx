@@ -32,6 +32,7 @@ export default function AccountingPage() {
     name: "",
     description: "",
   });
+  const [isBulk, setIsBulk] = useState(false);
   const [coaForm, setCoaForm] = useState<Partial<ChartOfAccount>>({
     code: "",
     name: "",
@@ -73,17 +74,26 @@ export default function AccountingPage() {
     setIsCatModalOpen(false);
     fetchCats();
   };
-  const handleCoaSave = async () => {
-    if (coaForm.id)
-      await axiosInstance.put(
-        `/accounting/chart-of-accounts/${coaForm.id}`,
-        coaForm
-      );
-    else await axiosInstance.post("/accounting/chart-of-accounts", coaForm);
-    setIsCoaModalOpen(false);
+  const handleCoaSave = async (
+    entries: Partial<ChartOfAccount> | Partial<ChartOfAccount>[]
+  ) => {
+    if (Array.isArray(entries)) {
+      // Bulk save
+      await axiosInstance.post("/accounting/chart-of-accounts/bulk", entries);
+    } else {
+      if (entries.id) {
+        await axiosInstance.put(
+          `/accounting/chart-of-accounts/${entries.id}`,
+          entries
+        );
+      } else {
+        await axiosInstance.post("/accounting/chart-of-accounts", entries);
+      }
+    }
     fetchCoas();
+    setIsCoaModalOpen(false);
+    setIsBulk(false);
   };
-
   const handleCatDelete = async (id: string) => {
     await axiosInstance.delete(`accounting/account-categories/${id}`);
     fetchCats();
@@ -109,7 +119,7 @@ export default function AccountingPage() {
   const coaColumns: ColumnDef<ChartOfAccount>[] = [
     { accessorKey: "name", header: "Account" },
     { accessorKey: "code", header: "Code" },
-    { accessorKey: "normalBalance", header: "Balance" },
+    { accessorKey: "description", header: "Description" },
     {
       id: "actions",
       header: "Actions",
@@ -142,7 +152,7 @@ export default function AccountingPage() {
   const catColumns: ColumnDef<AccountCategory>[] = [
     { accessorKey: "name", header: "Name" },
     { accessorKey: "code", header: "Code" },
-    { accessorKey: "normalBalance", header: "Balance" },
+    { accessorKey: "description", header: "Description" },
     {
       id: "actions",
       header: "Actions",
@@ -176,7 +186,7 @@ export default function AccountingPage() {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
-      <div className="border curs rounded-lg shadow-md p-4 space-y-3 bg-white">
+      <div className="border curs rounded-lg shadow-md p-4 space-y-3 bg-white dark:bg-gray-900">
         <div
           className="flex items-center justify-between cursor-pointer"
           onClick={() => setIsOpen(!isOpen)}
@@ -219,7 +229,7 @@ export default function AccountingPage() {
         )}
       </div>
       {/* COA grouped by code ranges */}
-      <div className="mt-10">
+      <div className="mt-10 p-1">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Chart of Accounts</h2>
           <Button
@@ -247,6 +257,8 @@ export default function AccountingPage() {
         setIsOpen={setIsCoaModalOpen}
         formData={coaForm}
         setFormData={setCoaForm}
+        isBulk={isBulk}
+        setIsBulk={setIsBulk}
         onSave={handleCoaSave}
       />
     </>

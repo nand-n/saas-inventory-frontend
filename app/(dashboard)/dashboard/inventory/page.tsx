@@ -16,7 +16,7 @@ import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import InventoryItemModal from "./_components/modals/inventory-item-modal";
 import StockTransferModal from "./_components/modals/stock-transfer-modal";
 import StockAdjustmentModal from "./_components/modals/stock-adjestment-modal";
-import useAuthStore from "@/store/auth/auth.store";
+import SummaryCards from "./_components/modals/summary-status";
 // import { useToast } from '@/components/ui/commons/toastProvider'
 
 const InventoryPage = () => {
@@ -27,10 +27,7 @@ const InventoryPage = () => {
 
   const itemsPerPage = 10;
   // const { showToast } = useToast()
-  const data = useAuthStore();
-  console.log(data, "data");
-  const userRoles = useUserStore((state) => state.roles);
-  const TenantId = "84e24130-6a56-4d55-8709-41774b1f4ef9";
+  const { tenantId: TenantId } = useUserStore();
   console.log(TenantId, "TenantId");
   const [formData, setFormData] = useState({
     item_name: "",
@@ -191,6 +188,22 @@ const InventoryPage = () => {
 
   const inventoryItemColumns: ColumnDef<InventoryItem>[] = [
     {
+      accessorKey: "sku",
+      header: "SKU",
+      cell: ({ row }) => (
+        <div className="grid justify-start items-center ">
+          <QRCode
+            value={row.getValue("sku")}
+            size={80}
+            className="border p-2 rounded-lg h-full"
+          />
+          <span className="font-bold text-xs text-center ">
+            {row.getValue("sku")}
+          </span>
+        </div>
+      ),
+    },
+    {
       accessorKey: "item_name",
       header: "Item Name",
     },
@@ -208,20 +221,7 @@ const InventoryPage = () => {
       accessorKey: "reorder_level",
       header: "Reorder Level",
     },
-    {
-      accessorKey: "sku",
-      header: "SKU",
-      cell: ({ row }) => (
-        <div className="flex justify-start items-center gap-2">
-          <QRCode
-            value={row.getValue("sku")}
-            size={80}
-            className="border p-2 rounded-lg h-full"
-          />
-          <span className="font-bold text-lg ">{row.getValue("sku")}</span>
-        </div>
-      ),
-    },
+
     {
       id: "actions",
       header: "Actions",
@@ -328,56 +328,8 @@ const InventoryPage = () => {
     };
   }, [summaryData]);
 
-  const SummaryCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Total Items</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {summaryLoading ? (
-            <div className="h-8 w-12 animate-pulse bg-gray-200 rounded" />
-          ) : (
-            <div className="text-2xl font-bold">{totalItems}</div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Total Quantity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {summaryLoading ? (
-            <div className="h-8 w-12 animate-pulse bg-gray-200 rounded" />
-          ) : (
-            <div className="text-2xl font-bold">{totalQuantity}</div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {summaryLoading ? (
-            <div className="h-8 w-12 animate-pulse bg-gray-200 rounded" />
-          ) : (
-            <div className="text-2xl font-bold">
-              $
-              {totalValue.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
-  );
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <h1 className="text-2xl font-bold text-gray-900">
           Inventory Management
@@ -411,54 +363,66 @@ const InventoryPage = () => {
           </Button>
         </div>
       </div>
-      <SummaryCards />
+      <SummaryCards
+        summaryLoading={summaryLoading}
+        totalItems={totalItems}
+        totalQuantity={totalQuantity}
+        totalValue={totalValue}
+      />
 
-      {/* Add Branch Grouping Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Branch Inventory Summary</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {summaryLoading ? (
-              <div className="animate-pulse space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="h-6 bg-gray-200 rounded" />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {summaryData?.map((branch: any) => (
-                  <div
-                    key={branch.branch_id}
-                    className="flex flex-col gap-2 p-4 border rounded-lg"
-                  >
-                    <div className="font-medium">{branch.branch_name}</div>
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Items: </span>
-                        {branch.total_items}
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">
-                          Quantity:{" "}
-                        </span>
-                        {branch.total_quantity}
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Value: </span>$
-                        {Number(branch.total_value).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
+      <div className="overflow-x-auto py-2">
+        <div className="flex gap-4 w-max">
+          <Card className="min-w-[300px] flex-shrink-0">
+            <CardHeader>
+              <CardTitle className="text-lg my-3">
+                Branch Inventory Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {summaryLoading ? (
+                <div className="animate-pulse space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-6 bg-gray-200 rounded" />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex gap-4 overflow-x-auto pb-2">
+                  {summaryData?.map((branch: any) => (
+                    <div
+                      key={branch.branch_id}
+                      className="flex-shrink-0 w-[250px] flex flex-col gap-2 p-4 border rounded-lg"
+                    >
+                      <div className="font-medium">{branch.branch_name}</div>
+                      <div className="grid grid-cols-1 gap-2 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Items: </span>
+                          {branch.total_items}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">
+                            Quantity:{" "}
+                          </span>
+                          {branch.total_quantity}
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Value: </span>
+                          $
+                          {Number(branch.total_value).toLocaleString(
+                            undefined,
+                            {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">

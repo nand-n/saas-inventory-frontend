@@ -82,7 +82,7 @@ const InventoryItemModal: FC<InventoryItemModalProps> = ({
       onConfirm={handleSave}
       modalTrigger={<div />}
     >
-      <div className="grid h-full overflow-y-auto gap-4 py-4">
+      <div className="grid h-full overflow-y-auto gap-4 py-4 px-1">
         <div className="flex justify-end  items-center gap-2">
           <span className="font-bold">Purchased on Credit</span>
           <Checkbox

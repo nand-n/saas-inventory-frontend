@@ -1,13 +1,13 @@
-import * as React from "react"
-import { Cross2Icon } from "@radix-ui/react-icons"
-import * as DialogPrimitives from "@radix-ui/react-dialog"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Cross2Icon } from "@radix-ui/react-icons";
+import * as DialogPrimitives from "@radix-ui/react-dialog";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
-const ModalProvider = DialogPrimitives.Root
+const ModalProvider = DialogPrimitives.Root;
 
-const ModalTrigger = DialogPrimitives.Trigger
+const ModalTrigger = DialogPrimitives.Trigger;
 
 const ModalPortal = ({
   children,
@@ -18,8 +18,8 @@ const ModalPortal = ({
       {children}
     </div>
   </DialogPrimitives.Portal>
-)
-ModalPortal.displayName = DialogPrimitives.Portal.displayName
+);
+ModalPortal.displayName = DialogPrimitives.Portal.displayName;
 
 const ModalOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitives.Overlay>,
@@ -33,11 +33,18 @@ const ModalOverlay = React.forwardRef<
     )}
     {...props}
   />
-))
-ModalOverlay.displayName = DialogPrimitives.Overlay.displayName
+));
+ModalOverlay.displayName = DialogPrimitives.Overlay.displayName;
 
 const modalVariants = cva(
-  "fixed z-50 grid w-full gap-4 bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
+  [
+    "fixed z-50 flex flex-col w-full bg-background p-6 shadow-lg duration-200",
+    "data-[state=open]:animate-in data-[state=closed]:animate-out",
+    "data-[state=open]:fade-in data-[state=closed]:fade-out-0",
+    "data-[state=open]:zoom-in-95 data-[state=closed]:zoom-out-95",
+    "data-[state=open]:slide-in-from-top-1/2 data-[state=closed]:slide-out-to-top-1/2",
+    "sm:rounded-lg",
+  ].join(" "),
   {
     variants: {
       size: {
@@ -52,8 +59,7 @@ const modalVariants = cva(
       size: "default",
     },
   }
-)
-
+);
 interface ModalContentProps
   extends React.ComponentPropsWithoutRef<typeof DialogPrimitives.Content>,
     VariantProps<typeof modalVariants> {}
@@ -72,8 +78,8 @@ const ModalContent = React.forwardRef<
       {children}
     </DialogPrimitives.Content>
   </ModalPortal>
-))
-ModalContent.displayName = DialogPrimitives.Content.displayName
+));
+ModalContent.displayName = DialogPrimitives.Content.displayName;
 
 const ModalHeader = ({
   className,
@@ -86,8 +92,8 @@ const ModalHeader = ({
     )}
     {...props}
   />
-)
-ModalHeader.displayName = "ModalHeader"
+);
+ModalHeader.displayName = "ModalHeader";
 
 const ModalFooter = ({
   className,
@@ -100,8 +106,8 @@ const ModalFooter = ({
     )}
     {...props}
   />
-)
-ModalFooter.displayName = "ModalFooter"
+);
+ModalFooter.displayName = "ModalFooter";
 
 const ModalTitle = React.forwardRef<
   React.ElementRef<typeof DialogPrimitives.Title>,
@@ -115,8 +121,8 @@ const ModalTitle = React.forwardRef<
     )}
     {...props}
   />
-))
-ModalTitle.displayName = DialogPrimitives.Title.displayName
+));
+ModalTitle.displayName = DialogPrimitives.Title.displayName;
 
 const ModalDescription = React.forwardRef<
   React.ElementRef<typeof DialogPrimitives.Description>,
@@ -127,8 +133,8 @@ const ModalDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
-ModalDescription.displayName = DialogPrimitives.Description.displayName
+));
+ModalDescription.displayName = DialogPrimitives.Description.displayName;
 
 const ModalClose = React.forwardRef<
   React.ElementRef<typeof DialogPrimitives.Close>,
@@ -145,8 +151,8 @@ const ModalClose = React.forwardRef<
     <Cross2Icon className="h-4 w-4" />
     <span className="sr-only">Close</span>
   </DialogPrimitives.Close>
-))
-ModalClose.displayName = DialogPrimitives.Close.displayName
+));
+ModalClose.displayName = DialogPrimitives.Close.displayName;
 
 export {
   ModalProvider,
@@ -157,4 +163,4 @@ export {
   ModalTitle,
   ModalDescription,
   ModalClose,
-}
+};

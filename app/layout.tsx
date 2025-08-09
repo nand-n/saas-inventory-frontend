@@ -4,6 +4,7 @@ import "./globals.css";
 import { Theme } from "@radix-ui/themes";
 import { ToastProvider, ToastViewport } from "@/components/ui/toast";
 import AuthHydration from "@/store/hydration/AuthHydration";
+import { ThemeProvider } from "@/providers/theme-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,16 +36,16 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-
       >
-        <Theme>
-        <ToastProvider>
+        {" "}
+        {/* <Theme> */}
+        <ThemeProvider>
+          <ToastProvider>
             {children}
             <ToastViewport />
           </ToastProvider>
-
-    </Theme>
-    
+        </ThemeProvider>
+        {/* </Theme> */}
       </body>
     </html>
   );

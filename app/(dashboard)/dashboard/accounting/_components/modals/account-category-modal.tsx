@@ -19,7 +19,6 @@ const AccountCategoryModal = ({
   setFormData,
   onSave,
 }: AccountCategoryModalProps) => {
-  console.log(formData, "formData");
   return (
     <Modal
       title={formData.id ? "Edit Category" : "Add Category"}
@@ -28,11 +27,11 @@ const AccountCategoryModal = ({
       onOpenChange={setIsOpen}
       onCancel={() => {
         setFormData({ name: "", code: "", description: "" });
+        setIsOpen(false);
       }}
       onConfirm={onSave}
-      modalTrigger={<div />}
     >
-      <div className="grid gap-4 py-4">
+      <div className="grid gap-4 py-4 px-1">
         <div className="space-y-2">
           <label className="text-sm font-medium">Name</label>
           <Input
@@ -43,18 +42,21 @@ const AccountCategoryModal = ({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">Code</label>
           <Input
             placeholder="Category Code"
+            label="Category Code"
             value={formData.code ?? ""}
             onChange={(e) => setFormData({ ...formData, code: e.target.value })}
           />
         </div>
+
         <div className="space-y-2">
           <label className="text-sm font-medium">Description</label>
-          <Input
+          <textarea
+            rows={3}
+            className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Description"
-            value={formData.code ?? ""}
+            value={formData.description ?? ""}
             onChange={(e) =>
               setFormData({ ...formData, description: e.target.value })
             }
