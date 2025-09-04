@@ -1,12 +1,6 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+import { Selector } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import QRCode from "react-qr-code";
 import Modal from "@/components/ui/commons/modalWrapper";
@@ -56,6 +50,7 @@ const InventoryItemModal: FC<InventoryItemModalProps> = ({
   const [isOnCredit, setIsOnCredit] = useState(false);
   return (
     <Modal
+      size="lg"
       title={selectedItem ? "Edit Inventory Item" : "Add Inventory Item"}
       description={
         selectedItem
@@ -82,7 +77,7 @@ const InventoryItemModal: FC<InventoryItemModalProps> = ({
       onConfirm={handleSave}
       modalTrigger={<div />}
     >
-      <div className="grid h-full overflow-y-auto gap-4 py-4 px-1">
+      <div className="grid w-full h-full overflow-y-auto gap-4 py-4 px-1">
         <div className="flex justify-end  items-center gap-2">
           <span className="font-bold">Purchased on Credit</span>
           <Checkbox
@@ -92,208 +87,157 @@ const InventoryItemModal: FC<InventoryItemModalProps> = ({
             title="Purchase on Credit"
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Item Name</label>
-          <Input
-            placeholder="Item Name"
-            value={formData.item_name}
-            onChange={(e) =>
-              setFormData({ ...formData, item_name: e.target.value })
-            }
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Unit Cost</label>
-          <Input
-            type="number"
-            placeholder="Unit Price"
-            value={formData.unit_cost}
-            onChange={(e) =>
-              setFormData({ ...formData, unit_cost: Number(e.target.value) })
-            }
-          />
-        </div>
+        <div className="grid w-full grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Input
+              placeholder="Item Name"
+              value={formData.item_name}
+              onChange={(e) =>
+                setFormData({ ...formData, item_name: e.target.value })
+              }
+              label="Item Name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Input
+              type="number"
+              placeholder="Unit Price"
+              value={formData.unit_cost}
+              onChange={(e) =>
+                setFormData({ ...formData, unit_cost: Number(e.target.value) })
+              }
+              label="Unit Cost"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Unit Price</label>
-          <Input
-            type="number"
-            placeholder="Unit Price"
-            value={formData.unit_price}
-            onChange={(e) =>
-              setFormData({ ...formData, unit_price: Number(e.target.value) })
-            }
-          />
-        </div>
+          <div className="space-y-2">
+            <Input
+              type="number"
+              placeholder="Unit Price"
+              value={formData.unit_price}
+              onChange={(e) =>
+                setFormData({ ...formData, unit_price: Number(e.target.value) })
+              }
+              label="Unit Price"
+            />
+          </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Quantity</label>
-          <Input
-            type="number"
-            placeholder="Quantity"
-            value={formData.quantity}
-            onChange={(e) =>
-              setFormData({ ...formData, quantity: Number(e.target.value) })
-            }
-          />
-        </div>
+          <div className="space-y-2">
+            <Input
+              label="Quantity"
+              type="number"
+              placeholder="Quantity"
+              value={formData.quantity}
+              onChange={(e) =>
+                setFormData({ ...formData, quantity: Number(e.target.value) })
+              }
+            />
+          </div>
 
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Reorder Level</label>
-          <Input
-            type="number"
-            placeholder="Reorder Level"
-            value={formData.reorder_level}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                reorder_level: Number(e.target.value),
-              })
-            }
-          />
+          <div className="space-y-2">
+            <Input
+              label="Reorder Level"
+              type="number"
+              placeholder="Reorder Level"
+              value={formData.reorder_level}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  reorder_level: Number(e.target.value),
+                })
+              }
+            />
+          </div>
         </div>
 
         <div className="flex  justify-between gap-2 items-center">
           <div className="space-y-2 gap-2 w-full">
             <label className="text-sm font-medium">Category</label>
-            <Select
+            <Selector
               value={formData.category_id}
               onValueChange={(value) =>
                 setFormData({ ...formData, category_id: value })
               }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Category" />
-              </SelectTrigger>
-              <SelectContent>
-                {inventoryCategories?.map((category) => (
-                  <SelectItem
-                    className="cursor-pointer w-full"
-                    key={category.id}
-                    value={category.id}
-                  >
-                    {category.category_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              options={inventoryCategories?.map((category) => ({
+                label: category.category_name,
+                value: category.id,
+              }))}
+              placeholder="Select Category"
+            />
           </div>
 
           <div className="space-y-2 w-full">
             <label className="text-sm font-medium">Branch</label>
-            <Select
+            <Selector
+              options={branches?.map((branch) => ({
+                label: branch.name,
+                value: branch.id,
+              }))}
+              placeholder="Select Branch"
               value={formData.branch_id}
               onValueChange={(value) =>
                 setFormData({ ...formData, branch_id: value })
               }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select Branch" />
-              </SelectTrigger>
-              <SelectContent>
-                {branches?.map((branch) => (
-                  <SelectItem
-                    className="cursor-pointer w-full"
-                    key={branch.id}
-                    value={branch.id}
-                  >
-                    {branch.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
         </div>
 
         <div className="flex  gap-2 items-center">
           <div className="space-y-2 w-full">
             <label className="text-sm font-medium">Inventory Account</label>
-            <Select
+            <Selector
+              options={coas
+                ?.filter(
+                  (coa) => Number(coa.code) < 4000 && Number(coa.code) >= 3000
+                )
+                .map((coa) => ({
+                  label: coa.name,
+                  value: coa.id,
+                }))}
+              placeholder="Select Inventory Account"
               value={formData.inventory_account_id}
               onValueChange={(value) =>
                 setFormData({ ...formData, inventory_account_id: value })
               }
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Inventory Account" />
-              </SelectTrigger>
-              <SelectContent>
-                {coas
-                  ?.filter(
-                    (item) =>
-                      Number(item.code) < 2000 && Number(item.code) >= 1000
-                  )
-                  ?.map((coa) => (
-                    <SelectItem
-                      className="cursor-pointer"
-                      key={coa.id}
-                      value={coa.id}
-                    >
-                      {coa.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+            />
           </div>
           {isOnCredit ? (
             <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Account Payable</label>
-              <Select
-                value={formData.payment_account_id}
+              <Selector
+                options={coas
+                  ?.filter(
+                    (coa) => Number(coa.code) < 3000 && Number(coa.code) >= 2000
+                  )
+                  .map((coa) => ({
+                    label: coa.name,
+                    value: coa.id,
+                  }))}
+                placeholder="Select Account Payable"
+                value={formData.payment_account_id || ""}
                 onValueChange={(value) =>
                   setFormData({ ...formData, payment_account_id: value })
                 }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Account Payable" />
-                </SelectTrigger>
-                <SelectContent>
-                  {coas
-                    ?.filter(
-                      (item) =>
-                        Number(item.code) < 3000 && Number(item.code) >= 2000
-                    )
-                    ?.map((coa) => (
-                      <SelectItem
-                        className="cursor-pointer w-full"
-                        key={coa.id}
-                        value={coa.id}
-                      >
-                        {coa.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
           ) : (
             <div className="space-y-2 w-full">
               <label className="text-sm font-medium">Cash Account</label>
-              <Select
-                value={formData.payment_account_id}
+              <Selector
+                options={coas
+                  ?.filter(
+                    (coa) => Number(coa.code) < 2000 && Number(coa.code) >= 1000
+                  )
+                  .map((coa) => ({
+                    label: coa.name,
+                    value: coa.id,
+                  }))}
+                placeholder="Select Cash Account"
+                value={formData.payment_account_id || ""}
                 onValueChange={(value) =>
                   setFormData({ ...formData, payment_account_id: value })
                 }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Cash Account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {coas
-                    ?.filter(
-                      (item) =>
-                        Number(item.code) < 2000 && Number(item.code) >= 1000
-                    )
-                    ?.map((coa) => (
-                      <SelectItem
-                        className="cursor-pointer w-full"
-                        key={coa.id}
-                        value={coa.id}
-                      >
-                        {coa.name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
           )}
         </div>

@@ -66,7 +66,6 @@ export default function SuppliersPage() {
     false
   );
 
-  branchs;
   const {
     data: inventoryCategories,
     loading: inventoryCategoriesLoading,

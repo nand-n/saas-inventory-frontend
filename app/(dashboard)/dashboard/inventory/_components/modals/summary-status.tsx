@@ -1,12 +1,23 @@
 import React from "react";
-import { Package, Layers, DollarSign } from "lucide-react";
+import {
+  Package,
+  Layers,
+  DollarSign,
+  AlertTriangle,
+  XCircle,
+  TrendingUp,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/utils";
 
 interface SummaryCardsProps {
   totalItems: number;
   totalQuantity: number;
   totalValue: number;
   summaryLoading: boolean;
+  lowStockItems?: number;
+  outOfStockItems?: number;
+  averagePrice?: number;
 }
 
 const SummaryCards: React.FC<SummaryCardsProps> = ({
@@ -14,6 +25,9 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({
   totalQuantity,
   totalValue,
   summaryLoading,
+  lowStockItems = 0,
+  outOfStockItems = 0,
+  averagePrice = 0,
 }) => {
   const statCards = [
     {
@@ -34,19 +48,40 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({
     },
     {
       title: "Total Value",
-      value: `$${totalValue.toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`,
+      value: `${formatCurrency(totalValue)}`,
       icon: DollarSign,
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
       borderColor: "border-purple-200 dark:border-purple-800",
     },
+    {
+      title: "Low Stock Items",
+      value: lowStockItems.toString(),
+      icon: AlertTriangle,
+      color: "text-yellow-600",
+      bgColor: "bg-yellow-100 dark:bg-yellow-900/30",
+      borderColor: "border-yellow-200 dark:border-yellow-800",
+    },
+    {
+      title: "Out of Stock",
+      value: outOfStockItems.toString(),
+      icon: XCircle,
+      color: "text-red-600",
+      bgColor: "bg-red-100 dark:bg-red-900/30",
+      borderColor: "border-red-200 dark:border-red-800",
+    },
+    {
+      title: "Average Price",
+      value: `${formatCurrency(averagePrice)}`,
+      icon: TrendingUp,
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-100 dark:bg-indigo-900/30",
+      borderColor: "border-indigo-200 dark:border-indigo-800",
+    },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
       {statCards.map((stat) => {
         const Icon = stat.icon;
         return (

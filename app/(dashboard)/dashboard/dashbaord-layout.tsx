@@ -32,6 +32,7 @@ import {
   TruckIcon,
   UsersIcon,
   WarehouseIcon,
+  ShieldIcon,
 } from "lucide-react";
 import {
   ChevronDownIcon,
@@ -106,6 +107,16 @@ export const navItems: NavItem[] = [
     name: "Customers",
     icon: <UsersIcon className="w-5 h-5 text-gray-500" />,
     path: "/dashboard/customers",
+  },
+  {
+    name: "CRM",
+    icon: <UsersIcon className="w-5 h-5 text-gray-500" />,
+    path: "/dashboard/crm",
+  },
+  {
+    name: "Risks",
+    icon: <ShieldIcon className="w-5 h-5 text-gray-500" />,
+    path: "/dashboard/risks",
   },
   {
     name: "Setrtings",

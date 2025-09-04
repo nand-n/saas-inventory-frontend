@@ -12,29 +12,29 @@ import BasicInfo from "./basicInfo";
 import PlansAndBilling from "./plnansAndBilling";
 import Branches from "./_components/branchs";
 import InventorySettings from "./inventory";
-
+import UserTab from "./users/userTab";
 
 const SettingsPage = () => {
   return (
     <FormWrapper>
       <Tabs defaultValue="industry" className=" max-w-full mx-auto">
-        <TabsList className="flex justify-start space-x-1 border-b overflow-x-auto scrollbar-hide" >
-        <TabsTrigger value="basic">Basic Info</TabsTrigger>
-        <TabsTrigger value="plans&billing">Plans & Billing</TabsTrigger>
-        <TabsTrigger value="team">Team</TabsTrigger>
-        <TabsTrigger value="configurations">Configurations</TabsTrigger>
-        <TabsTrigger value="industry">Industry Type</TabsTrigger>
-        <TabsTrigger value="branch">Branch</TabsTrigger>
-        <TabsTrigger value="users">Users</TabsTrigger>
-        <TabsTrigger value="roles">Roles</TabsTrigger>
-        <TabsTrigger value="permissions">Permissions</TabsTrigger>
-        <TabsTrigger value="inventorySettings">Inventory Settings</TabsTrigger>
-
-
+        <TabsList className="flex justify-start space-x-1 border-b overflow-x-auto scrollbar-hide">
+          <TabsTrigger value="basic">Basic Info</TabsTrigger>
+          <TabsTrigger value="plans&billing">Plans & Billing</TabsTrigger>
+          <TabsTrigger value="team">Team</TabsTrigger>
+          <TabsTrigger value="configurations">Configurations</TabsTrigger>
+          <TabsTrigger value="industry">Industry Type</TabsTrigger>
+          <TabsTrigger value="branch">Branch</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
+          <TabsTrigger value="roles">Roles</TabsTrigger>
+          <TabsTrigger value="permissions">Permissions</TabsTrigger>
+          <TabsTrigger value="inventorySettings">
+            Inventory Settings
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="basic">
-        <BasicInfo />
+          <BasicInfo />
         </TabsContent>
 
         <TabsContent value="configurations">
@@ -42,7 +42,7 @@ const SettingsPage = () => {
         </TabsContent>
 
         <TabsContent value="industry">
-        <IndustryType />
+          <IndustryType />
         </TabsContent>
         <TabsContent value="branch">
           <Branches />
@@ -51,16 +51,13 @@ const SettingsPage = () => {
           <PlansAndBilling />
         </TabsContent>
         <TabsContent value="users">
-          <UsersForm />
-        </TabsContent>
-        <TabsContent value="roles">
-          <RolesForm />
+          <UserTab />
         </TabsContent>
         <TabsContent value="permissions">
           <PermissionsForm />
         </TabsContent>
-             <TabsContent value="inventorySettings">
-        <InventorySettings />
+        <TabsContent value="inventorySettings">
+          <InventorySettings />
         </TabsContent>
       </Tabs>
     </FormWrapper>

@@ -2,13 +2,10 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Pagination } from "@/components/ui/pagination";
 import { TableWrapper } from "@/components/ui/commons/tableWrapper";
 import { ColumnDef } from "@tanstack/react-table";
 import QRCode from "react-qr-code";
 import { Plus, Trash, Pencil, Filter, Download, Eye } from "lucide-react";
-import { toast } from "sonner";
 import axiosInstance from "@/lib/axiosInstance";
 import { exportToCSV, formatCurrency } from "@/lib/utils";
 import { SalesOrder } from "@/types/sales-order.types";
@@ -28,6 +25,10 @@ import { useAsync } from "@/hooks/useAsync";
 import { Badge } from "@/components/ui/badge";
 import dayjs from "dayjs";
 import SalesOrderForm from "./_components/so-form";
+import SalesOrderFilters from "./_components/sales-order-filter";
+import { FilterOptions } from "@/types/common.type";
+import BulkActions from "@/components/commons/BulkActions";
+import SalesOrderDetails from "./_components/salse-order-detaile";
 
 export default function SalesOrderPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -99,13 +100,11 @@ export default function SalesOrderPage() {
 
   const handleDelete = async (id: string) => {
     await deleteSalesOrder(id);
-    toast.success("Sales order deleted");
     fetchSalesOrders();
   };
 
   const confirmBulkDelete = async () => {
     await bulkDeleteSalesOrders(selectedSOs);
-    toast.success(`${selectedSOs.length} sales order(s) deleted successfully!`);
     setSelectedSOs([]);
     setIsDeleteModalOpen(false);
   };
@@ -123,7 +122,6 @@ export default function SalesOrderPage() {
       data,
       `sales-orders-${new Date().toISOString().split("T")[0]}.csv`
     );
-    toast.success("Sales orders exported successfully!");
   };
 
   const columns: ColumnDef<SalesOrder>[] = [
@@ -268,7 +266,7 @@ export default function SalesOrderPage() {
         </div>
       </div>
 
-      {/* {isFiltersOpen && (
+      {isFiltersOpen && (
         <div className="mt-4">
           <SalesOrderFilters
             filters={filters}
@@ -276,15 +274,16 @@ export default function SalesOrderPage() {
             customers={customers}
           />
         </div>
-      )} */}
+      )}
 
-      {/* {selectedSOs.length > 0 && (
-        <SalesOrderBulkActions
+      {selectedSOs.length > 0 && (
+        <BulkActions
           selectedCount={selectedSOs.length}
           onBulkDelete={() => setIsDeleteModalOpen(true)}
           canDelete={true}
+          onExport={handleExport}
         />
-      )} */}
+      )}
 
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <DialogContent>
@@ -314,7 +313,7 @@ export default function SalesOrderPage() {
         title="Sales Orders"
       />
 
-      {/* {selectedSO && (
+      {selectedSO && (
         <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
@@ -333,8 +332,8 @@ export default function SalesOrderPage() {
             />
           </DialogContent>
         </Dialog>
-      )} */}
-      {/* {selectedSO && (
+      )}
+      {selectedSO && (
         <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
           <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
             <DialogHeader>
@@ -351,7 +350,7 @@ export default function SalesOrderPage() {
             />
           </DialogContent>
         </Dialog>
-      )} */}
+      )}
     </div>
   );
 }

@@ -1,19 +1,13 @@
 "use client";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Employee } from "@/types/hr.types";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Selector } from "@/components/ui/select";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const schema = z.object({
@@ -88,6 +82,7 @@ export default function EmployeeForm({
     formState: { errors, isSubmitting },
     setValue,
     watch,
+    control,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -142,63 +137,99 @@ export default function EmployeeForm({
           <p>Personal and contact details.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="First Name *" {...register("firstName")} />
-          <Input label="Last Name *" {...register("lastName")} />
-          <Input label="Middle Name" {...register("middleName")} />
-          <Input label="Email *" type="email" {...register("email")} />
-          <Input label="Phone *" {...register("phone")} />
-          <Input label="Alternate Phone" {...register("alternatePhone")} />
+          <Input
+            label="First Name *"
+            {...register("firstName")}
+            error={errors.firstName?.message}
+          />
+          <Input
+            label="Last Name *"
+            {...register("lastName")}
+            error={errors.lastName?.message}
+          />
+          <Input
+            label="Middle Name"
+            {...register("middleName")}
+            error={errors.middleName?.message}
+          />
+          <Input
+            label="Email *"
+            type="email"
+            {...register("email")}
+            error={errors.email?.message}
+          />
+          <Input
+            label="Phone *"
+            {...register("phone")}
+            error={errors.phone?.message}
+          />
+          <Input
+            label="Alternate Phone"
+            {...register("alternatePhone")}
+            error={errors.alternatePhone?.message}
+          />
           <Input
             label="Date of Birth"
             type="date"
             {...register("dateOfBirth")}
+            error={errors.dateOfBirth?.message}
           />
 
-          <div>
-            <Label>Gender</Label>
-            <Select
-              value={watch("gender") || ""}
-              onValueChange={(val) =>
-                setValue("gender", val as FormData["gender"])
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Gender" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Controller
+            name="gender"
+            control={control}
+            render={({ field }) => (
+              <Selector
+                value={field.value || ""}
+                onValueChange={field.onChange}
+                options={[
+                  { value: "male", label: "Male" },
+                  { value: "female", label: "Female" },
+                  { value: "other", label: "Other" },
+                ]}
+                placeholder="Select Gender"
+                label="Gender"
+                error={errors.gender?.message}
+              />
+            )}
+          />
 
-          <div className="w-full">
-            <Label>Marital Status</Label>
-            <Select
-              value={watch("maritalStatus") || ""}
-              onValueChange={(val) =>
-                setValue("maritalStatus", val as FormData["maritalStatus"])
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Marital Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="single">Single</SelectItem>
-                <SelectItem value="married">Married</SelectItem>
-                <SelectItem value="divorced">Divorced</SelectItem>
-                <SelectItem value="widowed">Widowed</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Controller
+            name="maritalStatus"
+            control={control}
+            render={({ field }) => (
+              <Selector
+                value={field.value || ""}
+                onValueChange={field.onChange}
+                options={[
+                  { value: "single", label: "Single" },
+                  { value: "married", label: "Married" },
+                  { value: "divorced", label: "Divorced" },
+                  { value: "widowed", label: "Widowed" },
+                  { value: "separated", label: "Separated" },
+                ]}
+                placeholder="Select Marital Status"
+                label="Marital Status"
+                error={errors.maritalStatus?.message}
+              />
+            )}
+          />
 
-          <Input label="National ID" {...register("nationalId")} />
+          <Input
+            label="National ID"
+            {...register("nationalId")}
+            error={errors.nationalId?.message}
+          />
           <Input
             label="Social Security Number"
             {...register("socialSecurityNumber")}
+            error={errors.socialSecurityNumber?.message}
           />
-          <Input label="Tax ID" {...register("taxId")} />
+          <Input
+            label="Tax ID"
+            {...register("taxId")}
+            error={errors.taxId?.message}
+          />
         </CardContent>
       </Card>
 
@@ -208,122 +239,181 @@ export default function EmployeeForm({
           <p>Employment information and department.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Hire Date *" type="date" {...register("hireDate")} />
-          <Input label="Job Title" {...register("jobTitle")} />
+          <Input
+            label="Hire Date *"
+            type="date"
+            {...register("hireDate")}
+            error={errors.hireDate?.message}
+          />
+          <Input
+            label="Job Title"
+            {...register("jobTitle")}
+            error={errors.jobTitle?.message}
+          />
 
-          <div>
-            <Label>Status</Label>
-            <Select
-              value={watch("status") || ""}
-              onValueChange={(val) =>
-                setValue("status", val as FormData["status"])
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <Selector
+                value={field.value || ""}
+                onValueChange={field.onChange}
+                options={[
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                  { value: "terminated", label: "Terminated" },
+                ]}
+                placeholder="Select Status"
+                label="Status"
+                error={errors.status?.message}
+              />
+            )}
+          />
 
-          <div>
-            <Label>Employment Type</Label>
-            <Select
-              value={watch("employmentType") || ""}
-              onValueChange={(val) =>
-                setValue("employmentType", val as FormData["employmentType"])
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Employment Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="full_time">Full Time</SelectItem>
-                <SelectItem value="part_time">Part Time</SelectItem>
-                <SelectItem value="contract">Contract</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Controller
+            name="employmentType"
+            control={control}
+            render={({ field }) => (
+              <Selector
+                value={field.value || ""}
+                onValueChange={field.onChange}
+                options={[
+                  { value: "full_time", label: "Full Time" },
+                  { value: "part_time", label: "Part Time" },
+                  { value: "contractor", label: "Contractor" },
+                  { value: "intern", label: "Intern" },
+                ]}
+                placeholder="Select Employment Type"
+                label="Employment Type"
+                error={errors.employmentType?.message}
+              />
+            )}
+          />
 
-          <Input label="Salary *" type="number" {...register("salary")} />
+          <Input
+            label="Salary *"
+            type="number"
+            {...register("salary")}
+            error={errors.salary?.message}
+          />
           <Input
             label="Hourly Rate"
             type="number"
             {...register("hourlyRate")}
+            error={errors.hourlyRate?.message}
           />
           <Input
             label="Weekly Hours"
             type="number"
             {...register("weeklyHours")}
+            error={errors.weeklyHours?.message}
           />
 
-          <div>
-            <Label>Department</Label>
-            <Select
-              value={watch("departmentId")}
-              onValueChange={(val) => setValue("departmentId", val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select Department" />
-              </SelectTrigger>
-              <SelectContent>
-                {departments.map((dept) => (
-                  <SelectItem key={dept.id} value={dept.id}>
-                    {dept.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Controller
+            name="departmentId"
+            control={control}
+            render={({ field }) => (
+              <Selector
+                value={field.value || ""}
+                onValueChange={field.onChange}
+                options={departments.map((dept) => ({
+                  value: dept.id,
+                  label: dept.name,
+                }))}
+                placeholder="Select Department"
+                label="Department"
+                emptyMessage="No departments available"
+                error={errors.departmentId?.message}
+              />
+            )}
+          />
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
           <CardTitle>Address</CardTitle>
-          <p>Employee’s home address information.</p>
+          <p>Employee's home address information.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Street" {...register("street")} />
-          <Input label="City" {...register("city")} />
-          <Input label="State" {...register("state")} />
-          <Input label="Zip Code" {...register("zipCode")} />
-          <Input label="Country" {...register("country")} />
+          <Input
+            label="Street"
+            {...register("street")}
+            error={errors.street?.message}
+          />
+          <Input
+            label="City"
+            {...register("city")}
+            error={errors.city?.message}
+          />
+          <Input
+            label="State"
+            {...register("state")}
+            error={errors.state?.message}
+          />
+          <Input
+            label="Zip Code"
+            {...register("zipCode")}
+            error={errors.zipCode?.message}
+          />
+          <Input
+            label="Country"
+            {...register("country")}
+            error={errors.country?.message}
+          />
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Banking Details</CardTitle>
           <p>Payment and bank account information.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Bank Account" {...register("bankAccount")} />
-          <Input label="Bank Name" {...register("bankName")} />
+          <Input
+            label="Bank Account"
+            {...register("bankAccount")}
+            error={errors.bankAccount?.message}
+          />
+          <Input
+            label="Bank Name"
+            {...register("bankName")}
+            error={errors.bankName?.message}
+          />
           <Input
             label="Bank Routing Number"
             {...register("bankRoutingNumber")}
+            error={errors.bankRoutingNumber?.message}
           />
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Emergency Contact</CardTitle>
           <p>Person to contact in case of emergency.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input label="Name" {...register("emergencyContactName")} />
+          <Input
+            label="Name"
+            {...register("emergencyContactName")}
+            error={errors.emergencyContactName?.message}
+          />
           <Input
             label="Relationship"
             {...register("emergencyContactRelationship")}
+            error={errors.emergencyContactRelationship?.message}
           />
-          <Input label="Phone" {...register("emergencyContactPhone")} />
+          <Input
+            label="Phone"
+            {...register("emergencyContactPhone")}
+            error={errors.emergencyContactPhone?.message}
+          />
           <Input
             label="Email"
             type="email"
             {...register("emergencyContactEmail")}
+            error={errors.emergencyContactEmail?.message}
           />
         </CardContent>
       </Card>
@@ -331,7 +421,7 @@ export default function EmployeeForm({
       <Card>
         <CardHeader>
           <CardTitle>Benefits</CardTitle>
-          <p>Employee’s company benefits and entitlements.</p>
+          <p>Employee's company benefits and entitlements.</p>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -360,11 +450,19 @@ export default function EmployeeForm({
           </div>
           <div>
             <Label>Paid Time Off (days)</Label>
-            <Input type="number" {...register("paidTimeOff")} />
+            <Input
+              type="number"
+              {...register("paidTimeOff")}
+              error={errors.paidTimeOff?.message}
+            />
           </div>
           <div>
             <Label>Sick Leave (days)</Label>
-            <Input type="number" {...register("sickLeave")} />
+            <Input
+              type="number"
+              {...register("sickLeave")}
+              error={errors.sickLeave?.message}
+            />
           </div>
         </CardContent>
       </Card>
