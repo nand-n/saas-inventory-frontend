@@ -308,7 +308,7 @@ const RisksPage = () => {
         </Button>
       </div>
 
-      {/* Statistics Cards */}
+      {/* Statistics Cards */}Mahlet
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">

@@ -15,7 +15,7 @@ import {
   ChevronUpDownIcon,
   MinusIcon,
 } from '@heroicons/react/16/solid'
-import type { Metadata } from 'next'
+// import type { Metadata } from 'next'
 import { useEffect, useState } from 'react'
 
 // export const metadata: Metadata = {
@@ -124,19 +124,30 @@ function Header() {
 }
 
 function PricingCards() {
+  type Plan = {
+    id: string;
+    plan_name: string;
+    description?: string;
+    current_price: number;
+    currency?: string;
+    recurring?: string; // e.g., per month, yearly
+    isFree?: boolean;
+    highlights?: { description: string; disabled?: boolean }[];
+    href?: string;
+  };
 
-  const [loading , setLodiang] = useState(false)
-  const [plans , setPlans ] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [plans, setPlans] = useState<Plan[]>([])
   useEffect(()=>{
     const fetchSubscriptionPlans = async ()=>{
-      setLodiang(true)
+      setLoading(true)
       try {
         const response = await axiosInstance.get('/plans')
         setPlans(response.data)
       } catch (error) {
         console.log(error);
       }finally{
-        setLodiang(false)
+        setLoading(false)
       }
     }
     fetchSubscriptionPlans()
@@ -146,9 +157,19 @@ function PricingCards() {
       <Gradient className="absolute inset-x-2 top-48 bottom-0 rounded-4xl ring-1 ring-black/5 ring-inset" />
       <Container className="relative">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {plans?.map((tier, tierIndex) => (
+          {loading && [0,1,2].map((i) => (
+            <div key={i} className="-m-2 grid grid-cols-1 rounded-4xl ring-1 shadow-[inset_0_0_2px_1px_#ffffff4d] ring-black/5 max-lg:mx-auto max-lg:w-full max-lg:max-w-md">
+              <div className="grid grid-cols-1 rounded-4xl p-2 shadow-md shadow-black/5">
+                <div className="rounded-3xl bg-white p-10 pb-9 ring-1 shadow-2xl ring-black/5 h-[340px] animate-pulse" />
+              </div>
+            </div>
+          ))}
+          {!loading && plans?.map((tier, tierIndex) => (
             <PricingCard key={tierIndex} tier={tier} />
           ))}
+          {!loading && plans?.length === 0 && (
+            <div className="col-span-full text-center text-gray-600">No plans available.</div>
+          )}
         </div>
         <LogoCloud className="mt-24" />
       </Container>
@@ -195,7 +216,17 @@ function PricingCards() {
 import { FC } from "react";
 
 interface PricingCardProps {
-  tier: (typeof tiers)[number];
+  tier: {
+    id: string;
+    plan_name: string;
+    description?: string;
+    current_price: number;
+    currency?: string;
+    recurring?: string;
+    isFree?: boolean;
+    highlights?: { description: string; disabled?: boolean }[];
+    href?: string;
+  };
 }
 
 const PricingCard: FC<PricingCardProps> = ({ tier }) => {
@@ -208,21 +239,21 @@ const PricingCard: FC<PricingCardProps> = ({ tier }) => {
           
           <div className="mt-8 flex items-center gap-4">
             <div className="text-5xl font-medium text-gray-950">
-              {tier.current_price === 0 ? "Free" : `${tier?.currency} ${tier.current_price}`}
+              {tier.current_price === 0 ? "Free" : `${tier?.currency ?? "USD"} ${tier.current_price}`}
             </div>
             {tier.current_price > 0 && (
               <div className="text-sm/5 text-gray-950/75">
-                <p>{tier?.currency}</p>
-                <p>{tier?.recuring}</p>
+                <p>{tier?.currency ?? "USD"}</p>
+                <p>{tier?.recurring ?? "per month"}</p>
               </div>
             )}
           </div>
 
-          <div className="mt-8">gikiio
-            <Button href={tier.href}> {tier?.isFree ? "Start A free Trial " : "Pay now"}</Button>
+          <div className="mt-8">
+            <Button href={tier.href ?? `#`}> {tier?.isFree || tier.current_price === 0 ? "Start a free trial" : "Pay now"}</Button>
           </div>
 
-          {tier.highlights?.length > 0 && (
+          {tier.highlights?.length ? (
             <div className="mt-8">
               <h3 className="text-sm/6 font-medium text-gray-950">
                 Start selling with:
@@ -233,7 +264,7 @@ const PricingCard: FC<PricingCardProps> = ({ tier }) => {
                 ))}
               </ul>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -561,11 +592,7 @@ function FrequentlyAskedQuestions() {
   )
 }
 
-export default function Pricing({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
+export default function Pricing() {
   // let tier =
   //   typeof searchParams.tier === 'string'
   //     ? tiers.find(({ slug }) => slug === searchParams.tier)!

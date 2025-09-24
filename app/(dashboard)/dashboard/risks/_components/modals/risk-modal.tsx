@@ -106,7 +106,9 @@ const RiskModal: React.FC<RiskModalProps> = ({
   };
 
   const calculateRiskScore = () => {
-    return (formData.likelihood * formData.impact * 100).toFixed(1);
+    const likelihood = formData.likelihood ?? 0;
+    const impact = formData.impact ?? 0;
+    return (likelihood * impact * 100).toFixed(1);
   };
 
   const getSeverityColor = (severity: RiskSeverity) => {
@@ -151,7 +153,7 @@ const RiskModal: React.FC<RiskModalProps> = ({
             <div className="space-y-2">
               <Label htmlFor="severity">Severity</Label>
               <Selector
-                value={formData.severity}
+                value={formData.severity ?? RiskSeverity.MEDIUM}
                 onValueChange={(value: string) =>
                   setFormData({ ...formData, severity: value as RiskSeverity })
                 }
@@ -168,7 +170,7 @@ const RiskModal: React.FC<RiskModalProps> = ({
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              value={formData.description}
+              value={formData.description ?? ""}
               onChange={(e) =>
                 setFormData({ ...formData, description: e.target.value })
               }
@@ -228,7 +230,7 @@ const RiskModal: React.FC<RiskModalProps> = ({
               <span className="font-medium">Risk Score:</span>
               <span
                 className={`px-3 py-1 rounded-full text-sm font-semibold ${getSeverityColor(
-                  formData.severity
+                  formData.severity ?? RiskSeverity.MEDIUM
                 )}`}
               >
                 {calculateRiskScore()}
@@ -244,7 +246,7 @@ const RiskModal: React.FC<RiskModalProps> = ({
               <Label htmlFor="branchId">Branch ID</Label>
               <Input
                 id="branchId"
-                value={formData.branchId}
+                value={formData.branchId ?? ""}
                 onChange={(e) =>
                   setFormData({ ...formData, branchId: e.target.value })
                 }
@@ -256,7 +258,7 @@ const RiskModal: React.FC<RiskModalProps> = ({
               <Label htmlFor="shipmentId">Shipment ID</Label>
               <Input
                 id="shipmentId"
-                value={formData.shipmentId}
+                value={formData.shipmentId ?? ""}
                 onChange={(e) =>
                   setFormData({ ...formData, shipmentId: e.target.value })
                 }
@@ -269,7 +271,7 @@ const RiskModal: React.FC<RiskModalProps> = ({
             <Label htmlFor="mitigationPlan">Mitigation Plan</Label>
             <Textarea
               id="mitigationPlan"
-              value={formData.mitigationPlan}
+              value={formData.mitigationPlan ?? ""}
               onChange={(e) =>
                 setFormData({ ...formData, mitigationPlan: e.target.value })
               }

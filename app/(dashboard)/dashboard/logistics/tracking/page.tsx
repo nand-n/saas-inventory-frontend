@@ -61,7 +61,7 @@ export default function ShipmentTrackingPage() {
       case ShipmentStatus.PENDING:
         events.push({
           id: "1",
-          timestamp: shipment.createdAt,
+          timestamp: shipment.createdAt ?? '',
           status: "Shipment Created",
           location: shipment.originAddress?.city || "Origin",
           description: "Shipment has been created and is pending pickup",
@@ -73,7 +73,7 @@ export default function ShipmentTrackingPage() {
         events.push(
           {
             id: "1",
-            timestamp: shipment.createdAt,
+            timestamp: shipment.createdAt ?? "",
             status: "Shipment Created",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has been created and is pending pickup",
@@ -81,7 +81,7 @@ export default function ShipmentTrackingPage() {
           },
           {
             id: "2",
-            timestamp: shipment.shippedDate || shipment.createdAt,
+            timestamp: (shipment.shippedDate || shipment.createdAt) ?? "" ,
             status: "In Transit",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has departed from origin",
@@ -104,15 +104,15 @@ export default function ShipmentTrackingPage() {
         events.push(
           {
             id: "1",
-            timestamp: shipment.createdAt,
+            timestamp: shipment.createdAt ?? "", 
             status: "Shipment Created",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has been created and is pending pickup",
             type: "departure",
           },
           {
-            id: "2",
-            timestamp: shipment.shippedDate || shipment.createdAt,
+            id: "2", 
+            timestamp: (shipment.shippedDate || shipment.createdAt) ?? "",
             status: "In Transit",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has departed from origin",
@@ -135,7 +135,7 @@ export default function ShipmentTrackingPage() {
         events.push(
           {
             id: "1",
-            timestamp: shipment.createdAt,
+            timestamp: shipment.createdAt ?? "",
             status: "Shipment Created",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has been created and is pending pickup",
@@ -143,7 +143,7 @@ export default function ShipmentTrackingPage() {
           },
           {
             id: "2",
-            timestamp: shipment.shippedDate || shipment.createdAt,
+            timestamp: (shipment.shippedDate || shipment.createdAt) ?? "",
             status: "In Transit",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has departed from origin",
@@ -164,7 +164,7 @@ export default function ShipmentTrackingPage() {
         events.push(
           {
             id: "1",
-            timestamp: shipment.createdAt,
+            timestamp: shipment.createdAt ?? "",
             status: "Shipment Created",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has been created and is pending pickup",
@@ -172,7 +172,7 @@ export default function ShipmentTrackingPage() {
           },
           {
             id: "2",
-            timestamp: shipment.shippedDate || shipment.createdAt,
+            timestamp: (shipment.shippedDate || shipment.createdAt) ?? "",
             status: "In Transit",
             location: shipment.originAddress?.city || "Origin",
             description: "Shipment has departed from origin",

@@ -4,10 +4,7 @@ import { Button } from "@/components/ui/button";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Selector } from "@/components/ui/select";
-import {
-  LogisticsPartner,
-  LogisticsPartnerFormData,
-} from "@/types/logistics.type";
+import { LogisticsPartner, LogisticsPartnerFormData } from "@/types/logistics.type";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Globe, MapPin, Ship, Train, Truck } from "lucide-react";
 import { useState } from "react";
@@ -188,12 +185,7 @@ function LogisticsPartnerForm({
               onValueChange={field.onChange}
               options={partnerTypes.map((type) => ({
                 value: type.value,
-                label: (
-                  <div className="flex items-center gap-2">
-                    <type.icon className="h-4 w-4" />
-                    {type.label}
-                  </div>
-                ),
+                label: type.label,
               }))}
               placeholder="Select partner type"
               error={errors.type?.message}

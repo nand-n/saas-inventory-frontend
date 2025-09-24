@@ -9,8 +9,8 @@ import { Filter, X } from "lucide-react";
 import {
   CustomsDocumentType,
   CustomsDocumentStatus,
+  CustomsDocumentFilterOptions,
 } from "@/types/shipment.types";
-import { CustomsDocumentFilterOptions } from "@/store/customs-documents/useCustomsDocumentsStore";
 
 interface CustomsDocumentFiltersProps {
   filters: CustomsDocumentFilterOptions;

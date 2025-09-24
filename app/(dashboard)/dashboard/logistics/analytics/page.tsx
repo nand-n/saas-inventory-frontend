@@ -58,7 +58,7 @@ export default function LogisticsAnalyticsPage() {
     // Filter shipments based on selected period
     const now = new Date();
     const filteredShipments = shipments.filter((shipment) => {
-      const shipmentDate = new Date(shipment.createdAt);
+      const shipmentDate = new Date(shipment?.createdAt ?? "");
       const diffDays =
         (now.getTime() - shipmentDate.getTime()) / (1000 * 60 * 60 * 24);
 
@@ -133,7 +133,7 @@ export default function LogisticsAnalyticsPage() {
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     const currentMonthShipments = filteredShipments.filter((s) => {
-      const date = new Date(s.createdAt);
+      const date = new Date(s.createdAt?? "");
       return (
         date.getMonth() === currentMonth && date.getFullYear() === currentYear
       );
@@ -141,7 +141,7 @@ export default function LogisticsAnalyticsPage() {
     const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
     const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
     const previousMonthShipments = filteredShipments.filter((s) => {
-      const date = new Date(s.createdAt);
+      const date = new Date(s.createdAt ?? "");
       return (
         date.getMonth() === previousMonth && date.getFullYear() === previousYear
       );
@@ -178,7 +178,7 @@ export default function LogisticsAnalyticsPage() {
     const monthlyTrends = Array.from({ length: 6 }, (_, i) => {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthShipments = filteredShipments.filter((s) => {
-        const shipmentDate = new Date(s.createdAt);
+        const shipmentDate = new Date(s.createdAt ?? "");
         return (
           shipmentDate.getMonth() === date.getMonth() &&
           shipmentDate.getFullYear() === date.getFullYear()

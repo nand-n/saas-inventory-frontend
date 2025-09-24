@@ -132,11 +132,11 @@ const CustomsDocumentDetails: React.FC<CustomsDocumentDetailsProps> = ({
           )}
           <div>
             <p className="text-muted-foreground">Created At</p>
-            <p className="font-medium">{formatDate(document.createdAt)}</p>
+            <p className="font-medium">{formatDate(document.createdAt ?? "")}</p>
           </div>
           <div>
             <p className="text-muted-foreground">Updated At</p>
-            <p className="font-medium">{formatDate(document.updatedAt)}</p>
+            <p className="font-medium">{formatDate(document.updatedAt ?? "")}</p>
           </div>
           {document.deletedAt && (
             <div>
@@ -218,7 +218,7 @@ const CustomsDocumentDetails: React.FC<CustomsDocumentDetailsProps> = ({
                 <p className="font-medium">
                   {formatCurrency(
                     Number(document.declaredValue),
-                    document.currency
+                    // document.currency
                   )}
                 </p>
               </div>

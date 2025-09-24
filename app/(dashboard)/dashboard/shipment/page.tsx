@@ -33,13 +33,7 @@ import { useShipmentsStore } from "@/store/shipments/useShipmentsStore";
 import useTenantStore from "@/store/tenant/tenantStore";
 import useUserStore from "@/store/users/user.store";
 import ShipmentDetails from "./_components/shipment-detail";
-import {
-  SheetClose,
-  SheetContent,
-  SheetHeader,
-  SheetProvider,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { SheetClose, SheetContent, SheetHeader, SheetProvider, SheetTitle } from "@/components/ui/sheet";
 import CustomsDocumentForm, {
   CustomsDocumentFormData,
 } from "./_components/customs-document-form";
@@ -445,7 +439,7 @@ export default function ShipmentsPage() {
         data={paginated}
         loading={isLoading}
         title="Shipments"
-        rowSubComponent={(shipment) => renderCustomsDocumentsTable(shipment)}
+        rowSubComponent={(shipment: Shipment) => renderCustomsDocumentsTable(shipment)}
       />
 
       {selectedShipment && (
@@ -493,7 +487,7 @@ export default function ShipmentsPage() {
       {activeCustomDocumentShipmentId && (
         <SheetProvider
           open={!!activeCustomDocumentShipmentId}
-          onOpenChange={(isOpen) => {
+          onOpenChange={(isOpen: boolean) => {
             if (!isOpen) setActiveCustomDocumentShipmentId(null); // close sheet
           }}
         >
@@ -517,7 +511,7 @@ export default function ShipmentsPage() {
       {selectedCustomsDocument && (
         <SheetProvider
           open={!!selectedCustomsDocument}
-          onOpenChange={(isOpen) => {
+          onOpenChange={(isOpen: boolean) => {
             if (!isOpen) setSelectedCustomsDocument(null); // close sheet
           }}
         >

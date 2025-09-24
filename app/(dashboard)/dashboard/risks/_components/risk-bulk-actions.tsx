@@ -104,7 +104,6 @@ const RiskBulkActions: React.FC<RiskBulkActionsProps> = ({
               onValueChange={(value: string) =>
                 handleStatusUpdate(value as RiskStatus)
               }
-              disabled={statusUpdateLoading}
               options={Object.values(RiskStatus).map((status) => ({
                 value: status,
                 label:

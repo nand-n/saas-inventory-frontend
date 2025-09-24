@@ -21,6 +21,7 @@ interface ModalProps {
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   size?: "default" | "sm" | "lg" | "xl" | "full" | null;
+  isLoading?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -33,6 +34,7 @@ const Modal: React.FC<ModalProps> = ({
   open,
   onOpenChange,
   size = "default",
+  isLoading = false,
 }) => {
   return (
     <ModalProvider open={open} onOpenChange={onOpenChange}>

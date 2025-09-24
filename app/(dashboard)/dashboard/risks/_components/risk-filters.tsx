@@ -68,7 +68,7 @@ const RiskFiltersComponent: React.FC<RiskFiltersProps> = ({
         <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Severity</label>
           <Selector
-            value={filters.severity || ""}
+            value={typeof filters.severity === "string" ? filters.severity : ""}
             onValueChange={(value) =>
               handleFilterChange(
                 "severity",
@@ -87,7 +87,7 @@ const RiskFiltersComponent: React.FC<RiskFiltersProps> = ({
         </div>
 
         {/* Status Filter */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">Status</label>
           <Selector
             value={filters.status || ""}
@@ -108,7 +108,7 @@ const RiskFiltersComponent: React.FC<RiskFiltersProps> = ({
             ]}
             placeholder="All statuses"
           />
-        </div>
+        </div> */}
 
         {/* Branch Filter */}
         <div className="space-y-2">
@@ -137,7 +137,7 @@ const RiskFiltersComponent: React.FC<RiskFiltersProps> = ({
         </div>
 
         {/* Date Range */}
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <label className="text-sm font-medium text-gray-700">
             Date Range
           </label>
@@ -178,7 +178,7 @@ const RiskFiltersComponent: React.FC<RiskFiltersProps> = ({
               className="flex-1"
             />
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

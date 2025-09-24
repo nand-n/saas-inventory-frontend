@@ -31,7 +31,7 @@ export default function CustomerList({ onEdit }: CustomerListProps) {
     return customers.filter((customer) => {
       const matchesSearch =
         customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (customer.email?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
         customer.company?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesType = typeFilter === "all" || customer.type === typeFilter;
@@ -50,7 +50,7 @@ export default function CustomerList({ onEdit }: CustomerListProps) {
     }
   };
 
-  const getCustomerTypeColor = (type: CustomerType) => {
+  const getCustomerTypeColor = (type?: CustomerType) => {
     switch (type) {
       case CustomerType.IMPORTER:
         return "bg-blue-100 text-blue-800";
@@ -63,7 +63,8 @@ export default function CustomerList({ onEdit }: CustomerListProps) {
     }
   };
 
-  const getCustomerTypeLabel = (type: CustomerType) => {
+  const getCustomerTypeLabel = (type?: CustomerType) => {
+    if (!type) return "Unknown";
     return type.charAt(0).toUpperCase() + type.slice(1);
   };
 

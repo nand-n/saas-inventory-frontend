@@ -171,7 +171,69 @@ function SelectScrollDownButton({
   );
 }
 
+
+interface Option {
+  value: string;
+  label: string;
+}
+
+interface SelectorProps {
+  value: string;
+  onValueChange: (value: string) => void;
+  options: Option[];
+  placeholder?: string;
+  className?: string;
+  label?: string;
+  error?: string;
+  emptyMessage?: string;
+  emptyIcon?: React.ReactNode;
+  required?: boolean 
+}
+
+ function Selector({
+  value,
+  onValueChange,
+  options,
+  placeholder,
+  className,
+  label,
+  error,
+  emptyIcon,
+  emptyMessage,
+  required = false
+}: SelectorProps) {
+  return (
+    <div>
+      {label && (
+        <label className="block text-sm font-medium mb-1">{label}</label>
+      )}
+      <Select required={required} value={value} onValueChange={onValueChange}>
+        <SelectTrigger className={className} aria-invalid={Boolean(error) || undefined}>
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent>
+          {options.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-muted-foreground flex items-center gap-2">
+              {emptyIcon}
+              <span>{emptyMessage || "No options"}</span>
+            </div>
+          ) : (
+            options.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))
+          )}
+        </SelectContent>
+      </Select>
+      {error && (
+        <p className="mt-1 text-sm text-red-600" role="alert">{error}</p>
+      )}
+    </div>
+  );
+}
 export {
+  Selector,
   Select,
   SelectContent,
   SelectGroup,

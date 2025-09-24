@@ -28,18 +28,27 @@ export const FormInput = React.forwardRef<HTMLInputElement, FormInputProps>(
 // RegularInput.tsx (for non-form inputs)
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  error?: string;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ label, ...props }, ref) => {
+  ({ label, error, className, ...props }, ref) => {
     return (
       <div>
         {label && <label className="block text-sm font-medium mb-1">{label}</label>}
         <input
           ref={ref}
           {...props}
-          className="w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-invalid={Boolean(error) || undefined}
+          className={`w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            error ? 'border-red-500 focus:ring-red-500' : ''
+          } ${className ?? ''}`}
         />
+        {error && (
+          <p className="mt-1 text-sm text-red-600" role="alert">
+            {error}
+          </p>
+        )}
       </div>
     );
   }

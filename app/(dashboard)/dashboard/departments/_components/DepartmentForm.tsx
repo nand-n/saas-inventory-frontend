@@ -55,8 +55,8 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
         location: department.location || "",
         budget: department.budget,
         isActive: department.isActive,
-        parentDepartmentId: department.parentDepartmentId || "",
-        managerId: department.managerId || "",
+        parentDepartmentId: department?.parentDepartment?.id || "",
+        managerId: department.manager?.id || "",
         branchId: department.branchId,
       });
     } else {
