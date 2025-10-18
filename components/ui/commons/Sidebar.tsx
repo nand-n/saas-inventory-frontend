@@ -88,7 +88,7 @@ const navigation = [
   },
   {
     name: "CRM",
-    href: "/crm",
+    href: "/dashboard/crm",
     icon: UserCog,
   },
   // {
@@ -169,13 +169,13 @@ const navigation = [
 
   {
     name: "Shipment",
-    href: "/shipment",
+    href: "/dashboard/shipment",
     icon: Truck,
   },
 
   {
     name: "Logistics",
-    href: "/logistics",
+    href: "/dashboard/logistics",
     icon: Package,
   },
   {
@@ -183,11 +183,11 @@ const navigation = [
     href: "/warehouse",
     icon: Warehouse,
   },
-  {
-    name: "Analytics",
-    href: "/analytics",
-    icon: BarChart3,
-  },
+  // {
+  //   name: "Analytics",
+  //   href: "/analytics",
+  //   icon: BarChart3,
+  // },
   {
     name: "Settings",
     href: "/dashboard/settings",

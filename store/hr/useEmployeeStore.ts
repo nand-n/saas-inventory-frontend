@@ -188,34 +188,40 @@ export const useEmployeeStore = create<EmployeeStore>((set, get) => ({
     set({ filteredEmployees: filtered });
   },
 
-  calculateStats: () => {
-    const { employees } = get();
+calculateStats: () => {
+  const { employees } = get();
 
-    const total = employees.length;
-    const active = employees.filter(emp => emp.status === 'active').length;
-    const inactive = employees.filter(emp => emp.status === 'inactive').length;
-    const terminated = employees.filter(emp => emp.status === 'terminated').length;
+  const total = employees.length;
+  const active = employees.filter(emp => emp.status === 'active').length;
+  const inactive = employees.filter(emp => emp.status === 'inactive').length;
+  const terminated = employees.filter(emp => emp.status === 'terminated').length;
 
-    const totalSalary = employees.reduce((sum, emp) => sum + (emp?.salary ?? 0), 0);
-    const averageSalary = total > 0 ? totalSalary / total : 0;
+  // Convert salary to number
+  const totalSalary = employees.reduce(
+    (sum, emp) => sum + (emp?.salary ? Number(emp.salary) : 0),
+    0
+  );
 
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const newHiresThisMonth = employees.filter(emp => {
-      const hireDate = new Date(emp.hireDate);
-      return hireDate.getMonth() === currentMonth && hireDate.getFullYear() === currentYear;
-    }).length;
+  const averageSalary = total > 0 ? totalSalary / total : 0;
 
-    set({
-      stats: {
-        total,
-        active,
-        inactive,
-        terminated,
-        averageSalary,
-        totalSalary,
-        newHiresThisMonth,
-      },
-    });
-  },
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const newHiresThisMonth = employees.filter(emp => {
+    const hireDate = new Date(emp.hireDate);
+    return hireDate.getMonth() === currentMonth && hireDate.getFullYear() === currentYear;
+  }).length;
+
+  set({
+    stats: {
+      total,
+      active,
+      inactive,
+      terminated,
+      averageSalary,
+      totalSalary,
+      newHiresThisMonth,
+    },
+  });
+},
+
 }));

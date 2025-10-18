@@ -54,15 +54,18 @@ const EmployeeStats: React.FC<EmployeeStatsProps> = ({ stats }) => {
       bgColor: "bg-purple-100 dark:bg-purple-900/30",
       borderColor: "border-purple-200 dark:border-purple-800",
     },
-    {
-      title: "Departments",
-      change: "Active departments",
-      icon: Building,
+   {
+      title: "Total Payroll",
+      value: formatCurrency(stats.totalSalary, "ETB"),
+      change: "Total monthly payout",
+      icon: TrendingUp,
       color: "text-orange-600",
       bgColor: "bg-orange-100 dark:bg-orange-900/30",
       borderColor: "border-orange-200 dark:border-orange-800",
     },
   ];
+
+  console.log(stats ,"stats")
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

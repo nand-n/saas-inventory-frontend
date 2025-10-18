@@ -7,9 +7,9 @@ const nextConfig = {
     ignoreDuringBuilds: false,
   },
   images: { unoptimized: true },
-  experimental: {
-    esmExternals: false,
-  },
+  // experimental: {
+  //   esmExternals: false,
+  // },
 };
 
 module.exports = nextConfig;

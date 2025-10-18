@@ -36,12 +36,13 @@ export async function runAsync<Args extends Array<any>, ReturnType>(
 
 
 
-export function formatCurrency(amount: number): string {
+export function formatCurrency(amount: number, currency: string = 'ETB'): string {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'USD',
+    currency,
   }).format(amount);
 }
+
 
 export function formatDate(date: string): string {
   return new Intl.DateTimeFormat('en-US', {

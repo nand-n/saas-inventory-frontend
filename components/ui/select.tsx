@@ -193,7 +193,7 @@ interface SelectorProps {
  function Selector({
   value,
   onValueChange,
-  options,
+  options =[],
   placeholder,
   className,
   label,

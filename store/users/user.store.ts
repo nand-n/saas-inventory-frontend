@@ -1,5 +1,6 @@
 // stores/user.store.ts
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type User = {
   id: string;
@@ -15,15 +16,15 @@ type User = {
   phone: string;
   roles: string[];
   tenantId: string;
-  branchId: null;
-  subscriptionPlan: null;
+  branchId: string | null;
+  subscriptionPlan: any | null;
 };
 
 type UserStoreState = User & {
   setUser: (user: User) => void;
   clearUser: () => void;
   superAdminUser?: User | null;
-   setSuperAdminUser: (user: User) => void;
+  setSuperAdminUser: (user: User) => void;
   getSuperAdminUser: () => User | null;
 };
 
@@ -45,15 +46,23 @@ const initialState: User = {
   subscriptionPlan: null,
 };
 
-const useUserStore = create<UserStoreState>((set , get) => ({
-  ...initialState,
- superAdminUser: null,
+const useUserStore = create<UserStoreState>()(
+  persist(
+    (set, get) => ({
+      ...initialState,
+      superAdminUser: null,
 
-  setUser: (user) => set(() => ({ ...user })),
-  clearUser: () => set(initialState),
+      setUser: (user) => set(() => ({ ...user })),
+      clearUser: () => set(() => ({ ...initialState })),
 
-   setSuperAdminUser: (user) => set(() => ({ superAdminUser: { ...user } })),
-  getSuperAdminUser: () => get().superAdminUser ?? null,
-}));
+      setSuperAdminUser: (user) =>
+        set(() => ({ superAdminUser: { ...user } })),
+      getSuperAdminUser: () => get().superAdminUser ?? null,
+    }),
+    {
+      name: 'user-storage', 
+    }
+  )
+);
 
 export default useUserStore;

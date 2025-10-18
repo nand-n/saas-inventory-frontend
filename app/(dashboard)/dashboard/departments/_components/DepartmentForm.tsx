@@ -26,9 +26,9 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
   open,
   onOpenChange,
   department,
-  branches,
-  users,
-  departments,
+  branches = [],
+  users =[],
+  departments =[],
   onSubmit,
   isLoading = false,
 }) => {
@@ -96,7 +96,7 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
       size="xl"
       isLoading={isLoading}
     >
-      <div className="space-y-6">
+      <div className="space-y-6 px-2">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             label="Department Name"
@@ -145,7 +145,7 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
             label="Branch"
             value={form.watch("branchId") || ""}
             onValueChange={(value) => form.setValue("branchId", value)}
-            options={branches.map((branch) => ({
+            options={branches?.map((branch) => ({
               value: branch.id,
               label: branch.name,
             }))}
@@ -159,7 +159,6 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
               form.setValue("parentDepartmentId", value)
             }
             options={[
-              { value: "", label: "No Parent Department" },
               ...(parentDepartmentOptions || []),
             ]}
             placeholder="Select parent department"
@@ -172,7 +171,6 @@ const DepartmentForm: React.FC<DepartmentFormProps> = ({
             value={form.watch("managerId") || ""}
             onValueChange={(value) => form.setValue("managerId", value)}
             options={[
-              { value: "", label: "No Manager Assigned" },
               ...(users?.map((user) => ({
                 value: user?.id,
                 label: `${user?.firstName} ${user?.lastName}`,
