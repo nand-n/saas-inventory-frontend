@@ -36,21 +36,42 @@ export async function runAsync<Args extends Array<any>, ReturnType>(
 
 
 
-export function formatCurrency(amount: number, currency: string = 'ETB'): string {
+export function formatCurrency(
+  amount: number | string,
+  currency: string = 'ETB',
+): string {
+  // Handle case when amount is a string formatted like "1,234.56"
+  const numericValue =
+    typeof amount === 'string'
+      ? parseFloat(amount.replace(/,/g, '')) // remove commas, then convert to number
+      : amount;
+
+  // Safeguard if conversion fails
+  if (isNaN(numericValue)) {
+    console.warn(`Invalid amount passed to formatCurrency: ${amount}`);
+    return `${currency} 0.00`;
+  }
+
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency,
-  }).format(amount);
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numericValue);
 }
 
 
-export function formatDate(date: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date));
+export function formatDate(date?: string | null): string {
+  if (!date) return "—"; // return a dash or empty string instead of crashing
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "—"; // invalid date guard
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(d);
 }
+
 
 export function formatDateTime(date: string): string {
   return new Intl.DateTimeFormat('en-US', {
@@ -87,4 +108,61 @@ function convertToCSV(data: any[]): string {
   );
   
   return [headers.join(','), ...csvData].join('\n');
+}
+
+
+
+export function calculateTotalTaxes(payroll: {
+  federalTax: number;
+  stateTax: number;
+  socialSecurityTax: number;
+  medicareTax: number;
+}): number {
+  return (
+    payroll.federalTax +
+    payroll.stateTax +
+    payroll.socialSecurityTax +
+    payroll.medicareTax
+  );
+}
+
+export function calculateTotalDeductions(payroll: {
+  federalTax: number;
+  stateTax: number;
+  socialSecurityTax: number;
+  medicareTax: number;
+  healthInsurance?: number;
+  retirement401k?: number;
+  otherDeductions?: number;
+}): number {
+  const totalTaxes = calculateTotalTaxes(payroll);
+  const otherDeductions =
+    (payroll.healthInsurance || 0) +
+    (payroll.retirement401k || 0) +
+    (payroll.otherDeductions || 0);
+  
+  return totalTaxes + otherDeductions;
+}
+
+export function calculateTotalAdjustments(adjustments?: Array<{
+  direction: "addition" | "deduction";
+  amount: number;
+}>): { additions: number; deductions: number; net: number } {
+  if (!adjustments || adjustments.length === 0) {
+    return { additions: 0, deductions: 0, net: 0 };
+  }
+  
+  const additions = adjustments
+    .filter(adj => adj.direction === "addition")
+    .reduce((sum, adj) => sum + adj.amount, 0);
+  
+  const deductions = adjustments
+    .filter(adj => adj.direction === "deduction")
+    .reduce((sum, adj) => sum + adj.amount, 0);
+  
+  return {
+    additions,
+    deductions,
+    net: additions - deductions,
+  };
 }

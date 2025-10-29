@@ -66,7 +66,7 @@ const RiskDetail: React.FC<RiskDetailProps> = ({
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="text-lg font-semibold text-gray-900 mb-2">
+            <CardTitle className="text-lg font-semibold text-white mb-2">
               {risk.title}
             </CardTitle>
             <div className="flex items-center space-x-3">
@@ -115,21 +115,21 @@ const RiskDetail: React.FC<RiskDetailProps> = ({
         {/* Description */}
         {risk.description && (
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
+            <h4 className="text-sm font-medium  mb-1">
               Description
             </h4>
-            <p className="text-sm text-gray-600">{risk.description}</p>
+            <p className="text-sm ">{risk.description}</p>
           </div>
         )}
 
         {/* Risk Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <h4 className="text-sm font-medium text-white mb-1">
               Risk Score
             </h4>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-white">
                 {calculateRiskScore()}
               </span>
               <Badge variant="outline" className="text-xs">
@@ -138,21 +138,21 @@ const RiskDetail: React.FC<RiskDetailProps> = ({
             </div>
           </div>
 
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <h4 className="text-sm font-medium text-white mb-1">
               Likelihood
             </h4>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-white">
                 {(risk.likelihood * 100).toFixed(0)}%
               </span>
             </div>
           </div>
 
-          <div className="bg-gray-50 p-3 rounded-lg">
-            <h4 className="text-sm font-medium text-gray-700 mb-1">Impact</h4>
+          <div className="bg-gray-800 p-3 rounded-lg">
+            <h4 className="text-sm font-medium text-white mb-1">Impact</h4>
             <div className="flex items-center space-x-2">
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-white">
                 {(risk.impact * 100).toFixed(0)}%
               </span>
             </div>
@@ -163,19 +163,19 @@ const RiskDetail: React.FC<RiskDetailProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {risk.branchId && (
             <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-1">
+              <h4 className="text-sm font-medium  mb-1">
                 Branch ID
               </h4>
-              <p className="text-sm text-gray-600">{risk.branchId}</p>
+              <p className="text-sm ">{risk.branchId}</p>
             </div>
           )}
 
           {risk.shipmentId && (
             <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-1">
+              <h4 className="text-sm font-medium text- mb-1">
                 Shipment ID
               </h4>
-              <p className="text-sm text-gray-600">{risk.shipmentId}</p>
+              <p className="text-sm text-">{risk.shipmentId}</p>
             </div>
           )}
         </div>
@@ -183,26 +183,26 @@ const RiskDetail: React.FC<RiskDetailProps> = ({
         {/* Mitigation Plan */}
         {risk.mitigationPlan && (
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
+            <h4 className="text-sm font-medium  mb-1">
               Mitigation Plan
             </h4>
-            <p className="text-sm text-gray-600">{risk.mitigationPlan}</p>
+            <p className="text-sm ">{risk.mitigationPlan}</p>
           </div>
         )}
 
         {/* Timestamps */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-gray-200">
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-1">Created</h4>
-            <p className="text-sm text-gray-600">
+            <h4 className="text-sm font-medium  mb-1">Created</h4>
+            <p className="text-sm ">
               {dayjs(risk.createdAt).format("MMM DD, YYYY HH:mm")}
             </p>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
+            <h4 className="text-sm font-medium  mb-1">
               Last Updated
             </h4>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm ">
               {dayjs(risk.updatedAt).format("MMM DD, YYYY HH:mm")}
             </p>
           </div>
@@ -211,10 +211,10 @@ const RiskDetail: React.FC<RiskDetailProps> = ({
         {/* Resolution Date */}
         {risk.resolvedAt && (
           <div className="pt-2 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-700 mb-1">
+            <h4 className="text-sm font-medium  mb-1">
               Resolved At
             </h4>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm ">
               {dayjs(risk.resolvedAt).format("MMM DD, YYYY HH:mm")}
             </p>
           </div>

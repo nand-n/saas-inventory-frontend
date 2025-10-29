@@ -8,7 +8,7 @@ import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast, useToast } from "@/hooks/use-toast";
 import DepartmentForm from "./_components/DepartmentForm";
 import DepartmentFilters from "./_components/DepartmentFilters";
 import DepartmentDetail from "./_components/DepartmentDetail";
@@ -22,96 +22,57 @@ import useUserStore from "@/store/users/user.store";
 import { ColumnDef } from "@tanstack/react-table";
 import { TableWrapper } from "@/components/ui/commons/tableWrapper";
 import { formatCurrency } from "@/lib/utils";
+import { useDepartmentStore } from "@/store/departments/useDepartmentStore";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import EmployeeForm from "../hr/_components/employee-form";
+import { useEmployeeStore } from "@/store/hr/useEmployeeStore";
 
 function DepartmentsPage() {
-  const { tenantId: TenantId } = useUserStore();
- const {
-    data: branches = [],
-    loading: isbranchesLoading,
-    execute: fetchbranches,
-  } = useAsync(
-    () => axiosInstance.get(`/branches/${TenantId}`).then((res) => res.data),
-    false
-  );
 
-   const {
-    data: departments = [],
-    loading: isDepartmentsLoading,
-    execute: fetchDepartments,
-  } = useAsync(
-    // Corrected endpoint from /branches/ to /departments/ (adjust if necessary)
-    () => axiosInstance.get(`/departments/tenant/${TenantId}`).then((res) => res.data),
-    false
-  );
+const { tenantId } = useUserStore();
 
-   const {
-    data: users = [],
-    loading: isUsersLoading,
-    execute: fetchUsers,
-  } = useAsync(
-    () =>
-      axiosInstance.get(`/users/tenant/${TenantId}`).then((res) => res.data),
-    false
-  );
-  // const [departments, setDepartments] = useState<any[]>(departments);
-  const [filteredDepartments, setFilteredDepartments] = useState<any[]>([]);
+const {
+  branches,
+  users,
+  filteredDepartments,
+  loading,
+  fetchAll,
+  filters,
+  setFilters,
+  addDepartment,
+  editDepatment,
+  deleteDepartment,
+  bulkDelete,
+  getManagerName,
+  getBranchName,
+  expanded,
+  handleToggle,
+  applyFilters,
+  departments,
+  fetchBranches, 
+  fetchDepartments,
+  fetchUsers,
+  selectedDepartment, 
+  selectedDepartments,
+  setSelectedDepartment, 
+  setSelectedDepartments,
+  stats, 
+} = useDepartmentStore();
 
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    isLoading:employeeLoading,
+    addEmployee,
+  } = useEmployeeStore();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddEmployeeModalOpen, setIsAddEmployeeModalOpen] = useState(false);
+
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] =
-    useState<Department | null>(null);
-
- useEffect(() => {
-    if (TenantId) {
-      fetchbranches();
-      fetchUsers();
-      fetchDepartments(); 
-    }
-  }, [TenantId]);
-  const [filters, setFilters] = useState({
-    search: "",
-    isActive: undefined,
-    branchId: "",
-    managerId: "",
-    parentDepartmentId: "",
-  } as any);
-  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
-  const { toast } = useToast();
-
-  // Stats calculation
-  const stats = {
-    total: departments?.length ?? 0,
-    active: departments?.filter((d: any) => d.isActive).length ?? 0,
-    inactive: departments?.filter((d: any) => !d.isActive).length ?? 0,
-    totalBudget: departments?.reduce(
-      (sum: any, d: any) => sum + (d.budget || 0),
-      0
-    ),
-    averageBudget:
-      departments?.length > 0
-        ? departments?.reduce((sum: any, d: any) => sum + (d.budget || 0), 0) /
-          departments?.length
-        : 0,
-  };
 
   const handleAddDepartment = async (data: DepartmentFormData) => {
-    setIsLoading(true);
     try {
-      // // Mock API call - replace with actual API
-      // const newDepartment: Department = {
-      //   id: Date.now().toString(),
-      //   ...data,
-      //   createdAt: new Date().toISOString(),
-      //   updatedAt: new Date().toISOString(),
-      //   deletedAt: null,
-      //   createdByUser: "1",
-      //   updatedBy: "1",
-      // };
+      await  addDepartment(tenantId , data)
 
-      // setDepartments((prev) => [...prev, newDepartment]);
-      // setFilteredDepartments((prev) => [...prev, newDepartment]);
       setIsAddModalOpen(false);
       toast({
         title: "Success",
@@ -123,32 +84,14 @@ function DepartmentsPage() {
         description: "Failed to add department",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
 
   const handleEditDepartment = async (data: DepartmentFormData) => {
     if (!selectedDepartment) return;
 
-    setIsLoading(true);
     try {
-      // Mock API call - replace with actual API
-      const updatedDepartment = {
-        ...selectedDepartment,
-        ...data,
-        updatedAt: new Date().toISOString(),
-      };
-      // setDepartments((prev) =>
-      //   prev.map((d) =>
-      //     d.id === selectedDepartment.id ? updatedDepartment : d
-      //   )
-      // );
-      setFilteredDepartments((prev) =>
-        prev.map((d) =>
-          d.id === selectedDepartment.id ? updatedDepartment : d
-        )
-      );
+      await editDepatment(tenantId , selectedDepartment.id , data)
       setIsEditModalOpen(false);
       setSelectedDepartment(null);
       toast({
@@ -161,16 +104,12 @@ function DepartmentsPage() {
         description: "Failed to update department",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
-    }
+    } 
   };
 
   const handleDeleteDepartment = async (id: string) => {
     try {
-      // Mock API call - replace with actual API
-      // setDepartments((prev) => prev.filter((d) => d.id !== id));
-      setFilteredDepartments((prev) => prev.filter((d) => d.id !== id));
+deleteDepartment(tenantId , id)
       toast({
         title: "Success",
         description: "Department deleted successfully",
@@ -186,10 +125,7 @@ function DepartmentsPage() {
 
   const handleBulkDelete = async (ids: string[]) => {
     try {
-      // Mock API call - replace with actual API
-      // setDepartments((prev) => prev.filter((d) => !ids.includes(d.id)));
-      setFilteredDepartments((prev) => prev.filter((d) => !ids.includes(d.id)));
-      setSelectedDepartments([]);
+      await bulkDelete(tenantId, ids)
       toast({
         title: "Success",
         description: `${ids?.length} departments deleted successfully`,
@@ -203,59 +139,18 @@ function DepartmentsPage() {
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...(departments || [])];
-
-    if (filters.search) {
-      filtered = filtered.filter(
-        (dept) =>
-          dept.name.toLowerCase().includes(filters.search.toLowerCase()) ||
-          dept.code.toLowerCase().includes(filters.search.toLowerCase())
-      );
-    }
-
-    if (filters.isActive !== undefined) {
-      filtered = filtered.filter((dept) => dept.isActive === filters.isActive);
-    }
-
-    if (filters.branchId) {
-      filtered = filtered.filter((dept) => dept.branchId === filters.branchId);
-    }
-
-    if (filters.managerId) {
-      filtered = filtered.filter(
-        (dept) => dept.managerId === filters.managerId
-      );
-    }
-
-    if (filters.parentDepartmentId) {
-      filtered = filtered.filter(
-        (dept) => dept.parentDepartmentId === filters.parentDepartmentId
-      );
-    }
-
-    setFilteredDepartments(filtered);
-  };
 
   useEffect(() => {
     applyFilters();
   }, [filters, departments]);
 
-  const getManagerName = (managerId: string) => {
-    const user = users?.find((u: any) => u.id === managerId);
-    return user ? `${user.firstName} ${user.lastName}` : "Unknown";
-  };
+useEffect(() => {
+  if (tenantId) fetchAll(tenantId);
+}, [tenantId]);
 
-  const getBranchName = (branchId: string) => {
-    const branch = branches.find((b: Branch) => b.id === branchId);
-    return branch ? branch.name : "Unknown";
-  };
-
-    const [expanded, setExpanded] = useState<string | null>(null);
-
-  const handleToggle = (id: string) => {
-    setExpanded((prev) => (prev === id ? null : id));
-  };
+useEffect(() => {
+  useDepartmentStore.getState().applyFilters();
+}, [filters]);
 
   const departmentColumns: ColumnDef<Department>[] = [
     
@@ -282,19 +177,23 @@ function DepartmentsPage() {
       />
     ),
     cell: ({ row }) => (
-      <input
-        type="checkbox"
-        checked={selectedDepartments.includes(row.original.id)}
-        onChange={(e) => {
-          if (e.target.checked) {
-            setSelectedDepartments((prev) => [...prev, row.original.id]);
-          } else {
-            setSelectedDepartments((prev) =>
-              prev.filter((id) => id !== row.original.id)
-            );
-          }
-        }}
-      />
+     <input
+  type="checkbox"
+  checked={selectedDepartments.includes(row.original.id)}
+  onChange={(e) => {
+    if (e.target.checked) {
+      // Add the id
+      const updated = [...selectedDepartments, row.original.id];
+      setSelectedDepartments(updated);
+    } else {
+      // Remove the id
+      const updated = selectedDepartments.filter(
+        (id) => id !== row.original.id
+      );
+      setSelectedDepartments(updated);
+    }
+  }}
+/>
     ),
   },
   {
@@ -452,13 +351,38 @@ const renderEmployeesTable = (department: Department) => {
         loading={false}
         title={`Employees in ${department.name}`}
         rightHeaderContent={
-          <Button
-            onClick={() =>
-              console.log("Add employee to", department.id)
-            }
+          <RoleGuard
+            allowedRoles={[
+              UserRole.ADMIN,
+              UserRole.SUPER_ADMIN,
+              UserRole.HR_MANAGER,
+              UserRole.ALL,
+            ]}
           >
-            <Plus className="h-4 w-4 mr-2" /> Add Employee
-          </Button>
+            <Dialog open={isAddEmployeeModalOpen} onOpenChange={setIsAddEmployeeModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Employee
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Employee</DialogTitle>
+                </DialogHeader>
+                <EmployeeForm
+                  onSubmit={async (data) => {
+                    await addEmployee(data);
+                    setIsAddModalOpen(false);
+                  }}
+                  departments={departments}
+                  onCancel={() => setIsAddModalOpen(false)}
+                  departmentId={department.id}
+
+                />
+              </DialogContent>
+            </Dialog>
+          </RoleGuard>
         }
       />
     </div>
@@ -549,7 +473,7 @@ const renderEmployeesTable = (department: Department) => {
       </div>
 
       {/* Filters */}
-      {/* <DepartmentFilters
+      <DepartmentFilters
         filters={filters}
         onFiltersChange={setFilters}
         onClearFilters={() =>
@@ -561,10 +485,10 @@ const renderEmployeesTable = (department: Department) => {
             parentDepartmentId: "",
           })
         }
-        branches={branches}
-        users={users}
-        departments={departments}
-      /> */}
+        branches={branches ?? []}
+        users={users ??[]}
+        departments={departments ?? []}
+      />
 
       {/* Bulk Actions */}
       {selectedDepartments.length > 0 && (
@@ -574,7 +498,6 @@ const renderEmployeesTable = (department: Department) => {
             if (action.action === "delete") {
               handleBulkDelete(action.departmentIds);
             }
-            // Handle other actions as needed
           }}
           branches={branches}
           users={users}
@@ -591,7 +514,7 @@ const renderEmployeesTable = (department: Department) => {
   <TableWrapper<Department>
     columns={departmentColumns}
     data={filteredDepartments || []}
-    loading={isLoading}
+    loading={loading}
     title="Departments List"
    rowSubComponent={(department) =>
         expanded === department.id ? renderEmployeesTable(department) : null
@@ -610,7 +533,7 @@ const renderEmployeesTable = (department: Department) => {
         users={users}
         departments={departments}
         onSubmit={handleAddDepartment}
-        isLoading={isLoading}
+        isLoading={loading}
       />
 
       {/* Edit Department Modal */}
@@ -622,7 +545,7 @@ const renderEmployeesTable = (department: Department) => {
         users={users}
         departments={departments}
         onSubmit={handleEditDepartment}
-        isLoading={isLoading}
+        isLoading={loading}
       />
 
       {/* Department Detail Modal */}
@@ -641,7 +564,6 @@ const renderEmployeesTable = (department: Department) => {
         />
       )}
     </div>
-    // <></>
   );
 }
 

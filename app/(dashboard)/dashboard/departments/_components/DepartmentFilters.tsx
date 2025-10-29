@@ -24,9 +24,9 @@ const DepartmentFilters: React.FC<DepartmentFiltersProps> = ({
   filters,
   onFiltersChange,
   onClearFilters,
-  branches,
-  users,
-  departments,
+  branches =[],
+  users =[],
+  departments=[],
 }) => {
   const handleFilterChange = (
     key: keyof Filters,
@@ -77,7 +77,6 @@ const DepartmentFilters: React.FC<DepartmentFiltersProps> = ({
             )
           }
           options={[
-            { value: "", label: "All Status" },
             { value: "true", label: "Active" },
             { value: "false", label: "Inactive" },
           ]}
@@ -88,8 +87,7 @@ const DepartmentFilters: React.FC<DepartmentFiltersProps> = ({
           value={filters.branchId || ""}
           onValueChange={(value) => handleFilterChange("branchId", value)}
           options={[
-            { value: "", label: "All Branches" },
-            ...branches.map((branch) => ({
+            ...branches?.map((branch) => ({
               value: branch.id,
               label: branch.name,
             })),
@@ -101,7 +99,6 @@ const DepartmentFilters: React.FC<DepartmentFiltersProps> = ({
           value={filters.managerId || ""}
           onValueChange={(value) => handleFilterChange("managerId", value)}
           options={[
-            { value: "", label: "All Managers" },
             ...users.map((user) => ({
               value: user.id,
               label: `${user.firstName} ${user.lastName}`,

@@ -11,6 +11,12 @@ import {
   Banknote,
   ShoppingCart,
   CreditCard,
+  Route,
+  ClipboardList,
+  FileSpreadsheet,
+  Boxes,
+  AlertTriangle,
+  CalendarRange,
 } from 'lucide-react';
 import { NavigationItem } from './navigations.type';
 
@@ -20,7 +26,7 @@ export const navigationItems: NavigationItem[] = [
     href: '/dashboard/overview/',
     icon: LayoutDashboard,
   },
-  {
+    {
     name: 'HR',
     icon: UserCheck,
     children: [
@@ -30,16 +36,16 @@ export const navigationItems: NavigationItem[] = [
         icon: UserCheck,
       },
       {
+        name: 'Departments',
+        href: '/dashboard/departments/',
+        icon: Building2,
+      },
+      {
         name: 'Payroll',
         href: '/dashboard/hr/payroll/',
         icon: Banknote,
       },
     ],
-  },
-  {
-    name: 'Departments',
-    href: '/dashboard/departments/',
-    icon: Building2,
   },
   {
     name: 'Inventory',
@@ -62,13 +68,15 @@ export const navigationItems: NavigationItem[] = [
       },
     ],
   },
-  {
-    name: 'CRM',
-    href: '/dashboard/crm/',
-    icon: UserCog,
+ {
+    name: 'Planning',
+    href: '/dashboard/planning/',
+    icon: CalendarRange,
   },
-  {
-    name: 'Purchasing',
+
+
+    {
+    name: 'Procurement',
     icon: ShoppingCart,
     children: [
       {
@@ -77,14 +85,19 @@ export const navigationItems: NavigationItem[] = [
         icon: Building2,
       },
       {
-        name: 'RFQ',
+        name: 'RFQs',
         href: '/dashboard/procurement/rfq/',
-        icon: Package,
+        icon: ClipboardList,
       },
       {
         name: 'Purchase Orders',
         href: '/dashboard/procurement/purchase-orders/',
-        icon: Package,
+        icon: FileSpreadsheet,
+      },
+      {
+        name: 'Goods Receipt',
+        href: '/dashboard/procurement/goods-receipt/',
+        icon: Boxes,
       },
     ],
   },
@@ -104,20 +117,33 @@ export const navigationItems: NavigationItem[] = [
       },
     ],
   },
-  {
-    name: 'Shipment',
-    href: '/dashboard/shipment/',
-    icon: Truck,
-  },
-  {
+
+    {
     name: 'Logistics',
-    href: '/dashboard/logistics/',
-    icon: Package,
+    icon: Truck,
+    children: [
+      {
+        name: 'Shipments',
+        href: '/dashboard/shipment/',
+        icon: Truck,
+      },
+      {
+        name: 'Route & Delivery Tracking',
+        href: '/dashboard/logistics/',
+        icon: Route,
+      },
+    ],
   },
-  {
-    name: 'Warehouse',
-    href: '/dashboard/warehouse/',
-    icon: Warehouse,
+    {
+    name: 'CRM',
+    href: '/dashboard/crm/',
+    icon: UserCog,
+  },
+
+      {
+    name: 'Risks',
+    href: '/dashboard/risks/',
+    icon:  AlertTriangle,
   },
   {
     name: 'Settings',

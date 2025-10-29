@@ -29,6 +29,8 @@ import RiskDetail from "./_components/risk-detail";
 import RiskBulkActions from "./_components/risk-bulk-actions";
 import { useToast } from "@/hooks/use-toast";
 import dayjs from "dayjs";
+import Modal from "@/components/ui/commons/modalWrapper";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const RisksPage = () => {
   const { toast } = useToast();
@@ -464,30 +466,32 @@ const RisksPage = () => {
       />
 
       {/* Risk Detail Modal */}
-      {viewingRisk && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold">Risk Details</h2>
-                <Button variant="outline" onClick={() => setViewingRisk(null)}>
-                  Close
-                </Button>
-              </div>
-              <RiskDetail
-                risk={viewingRisk}
-                onEdit={(risk) => {
-                  setViewingRisk(null);
-                  setEditingRisk(risk);
-                  setIsModalOpen(true);
-                }}
-                onDelete={handleDeleteRisk}
-                onView={() => {}}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+  
+ <Dialog open={!!viewingRisk} onOpenChange={() => setViewingRisk(null)}>
+  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Risk Details</DialogTitle>
+    </DialogHeader>
+
+    {viewingRisk && (
+      <RiskDetail
+        risk={viewingRisk}
+        onEdit={(risk) => {
+          setViewingRisk(null);
+          setEditingRisk(risk);
+          setIsModalOpen(true);
+        }}
+        onDelete={handleDeleteRisk}
+        onView={() =>{}}
+        // ={() => {
+        //   setViewingRisk(null);
+        // }}
+      />
+    )}
+  </DialogContent>
+</Dialog>
+
+
     </div>
   );
 };

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -68,18 +68,20 @@ interface EmployeeFormProps {
   departments: Department[];
   onSubmit: (data: FormData) => Promise<void>;
   onCancel: () => void;
+  departmentId?: string
 }
 
 export default function EmployeeForm({
   employee,
-  departments,
+  departments = [],
   onSubmit,
   onCancel,
+  departmentId
 }: EmployeeFormProps) {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: {  errors, isSubmitting },
     setValue,
     watch,
     control,
@@ -308,13 +310,13 @@ export default function EmployeeForm({
             {...register("weeklyHours")}
             error={errors.weeklyHours?.message}
           />
-
+{/* 
           <Controller
             name="departmentId"
             control={control}
             render={({ field }) => (
               <Selector
-                value={field.value || ""}
+                value={field.value ?? ''} 
                 onValueChange={field.onChange}
                 options={departments.map((dept) => ({
                   value: dept.id,
@@ -324,9 +326,39 @@ export default function EmployeeForm({
                 label="Department"
                 emptyMessage="No departments available"
                 error={errors.departmentId?.message}
+                
               />
             )}
-          />
+          /> */}
+          <Controller
+  name="departmentId"
+  control={control}
+  render={({ field }) => {
+    useEffect(() => {
+      if (departmentId) {
+        const exists = departments.some((d) => d.id === departmentId);
+        if (exists && field.value !== departmentId) {
+          field.onChange(departmentId); // updates the form and UI
+        }
+      }
+    }, [departmentId, departments, field]);
+
+    return (
+      <Selector
+        value={field.value ?? ""}
+        onValueChange={(val) => field.onChange(val)} // keep UI & form in sync
+        options={departments.map((dept) => ({
+          value: dept.id,
+          label: dept.name,
+        }))}
+        placeholder="Select Department"
+        label="Department"
+        emptyMessage="No departments available"
+        error={errors.departmentId?.message}
+      />
+    );
+  }}
+/>
         </CardContent>
       </Card>
 

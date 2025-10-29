@@ -11,32 +11,28 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { exportToCSV, formatCurrency, formatDate } from "@/lib/utils";
-import { Download, Edit, Eye, Filter, Plus, Trash2 } from "lucide-react";
+import { Check, ChevronDown, ChevronRight, Download, Edit, Eye, Filter, Pencil, Plus, Trash, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-// import PayrollDetails from "../_components/payroll-details";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-// import PayrollBulkActions from "../_components/payroll-bulk-actions";
-// import PayrollFilters from "../_components/payroll-filters";
 import { usePayrollStore } from "@/store/hr/usePayrollStore";
 import PayrollForm from "./_components/payroll-form";
 import { useAsync } from "@/hooks/useAsync";
 import axiosInstance from "@/lib/axiosInstance";
-import { Payroll } from "@/types/payroll.types";
+import { CreatePayrollRunDto, Payroll, PayrollAdjustment, PayrollRun, PayrollRunStatus } from "@/types/payroll.types";
 import { UserRole } from "@/types/hr.types";
 import PayrollBulkActions from "./_components/payroll-bulk-action";
 import PayrollDetails from "./_components/payroll-detail";
 import PayrollFilters from "./_components/payroll-filter";
 import useTenantStore from "@/store/tenant/tenantStore";
+import { TableWrapper } from "@/components/ui/commons/tableWrapper";
+import { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
+import PayrollAdjustmentForm from "./_components/payroll-adjestment-form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PayrollRunForm from "./_components/payroll-run-form";
+import PayrollRunDetail from "./_components/payroll-run-detail";
 
 export default function PayrollPage() {
   const {
@@ -51,12 +47,32 @@ export default function PayrollPage() {
     bulkDeletePayrolls,
     setFilters,
     clearFilters,
+    addAdjustment,
+    addPayrollRun,
+    adjustments,
+    applyFilters,
+    calculateStats, 
+    fetchAdjustments,
+    fetchPayrollRuns, 
+    payrollRuns, 
+    updatePayrollRun,
+    changePayrollRunStatus,
+    settleAdjustment, 
+    stats,
+    selectedRuns ,
+    setSelectedRuns
+
   } = usePayrollStore();
 
   useEffect(() => {
     fetchPayrolls();
-  }, [fetchPayrolls]);
+    fetchAdjustments()
+    fetchPayrollRuns()
+  }, [fetchPayrolls , fetchAdjustments , fetchPayrollRuns]);
 
+
+    const [activeTab, setActiveTab] = useState("runs");
+  
   const { id: tenantid } = useTenantStore();
   const {
     data: employees = [],
@@ -80,8 +96,13 @@ export default function PayrollPage() {
   } = useAsync(
     () =>
       axiosInstance.get(`departments/tenant/${tenantid}`).then((r) => r.data),
-    true
+    false
   );
+  useEffect(()=>{
+    if(tenantid){
+    fetchDepartments()
+    }
+  } , [tenantid])
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -129,12 +150,12 @@ export default function PayrollPage() {
         p.payPeriodEnd
       )}`,
       "Gross Pay": formatCurrency(p.grossPay),
-      Taxes: formatCurrency(
-        (p.federalTax || 0) +
-          (p.stateTax || 0) +
-          (p.socialSecurityTax || 0) +
-          (p.medicareTax || 0)
-      ),
+      // Taxes: formatCurrency(
+      //   (p.federalTax || 0) +
+      //     (p.stateTax || 0) +
+      //     (p.socialSecurityTax || 0) +
+      //     (p.medicareTax || 0)
+      // ),
       "Net Pay": formatCurrency(p.netPay),
       Status: p.status,
     }));
@@ -192,9 +213,556 @@ export default function PayrollPage() {
       setSelectedPayrolls(sortedPayrolls.map((p) => p.id));
     }
   };
+  const [isAddAdjustmentModalOpen , setIsAddAdjustmentModalOpen] = useState(false)
+
+
+  const [expanded , setExpanded]  = useState<string | null>(null)
+  const handleToggle =(id:string)=>{
+    setExpanded(id)
+  }
+
+
+
+
+  const payrollColumns: ColumnDef<Payroll>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <input
+        type="checkbox"
+        onChange={(e) => {
+          if (e.target.checked) {
+            const allIds = table
+              .getFilteredRowModel()
+              .rows.map((row) => row.original.id);
+            setSelectedPayrolls(allIds);
+          } else {
+            setSelectedPayrolls([]);
+          }
+        }}
+        checked={
+          selectedPayrolls.length ===
+            table.getFilteredRowModel().rows.length &&
+          table.getFilteredRowModel().rows.length > 0
+        }
+      />
+    ),
+    cell: ({ row }) => (
+      <input
+        type="checkbox"
+        checked={selectedPayrolls.includes(row.original.id)}
+        onChange={(e) => {
+          if (e.target.checked) {
+            setSelectedPayrolls([...selectedPayrolls, row.original.id]);
+          } else {
+            setSelectedPayrolls(
+              selectedPayrolls.filter((id) => id !== row.original.id)
+            );
+          }
+        }}
+      />
+    ),
+  },
+  {
+    accessorKey: "id",
+    header: "Payroll ID",
+    cell: ({ row }) => row.original.id,
+  },
+  {
+    accessorKey: "employee",
+    header: "Employee",
+    cell: ({ row }) =>
+      `${row.original.employee.firstName} ${row.original.employee.lastName}`,
+  },
+  {
+    accessorKey: "payPeriodStart",
+    header: "Pay Period",
+    cell: ({ row }) =>
+      `${formatDate(row.original.payPeriodStart)} - ${formatDate(
+        row.original.payPeriodEnd
+      )}`,
+  },
+  {
+    accessorKey: "grossPay",
+    header: "Gross Pay",
+    cell: ({ row }) => formatCurrency(row.original.grossPay ?? 0),
+  },
+  {
+    accessorKey: "netPay",
+    header: "Net Pay",
+    cell: ({ row }) => formatCurrency(row.original.netPay ?? 0),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge
+        variant={
+          row.original.status === "paid"
+            ? "default"
+            : row.original.status === "draft"
+            ? "secondary"
+            : "destructive"
+        }
+      >
+        {row.original.status}
+      </Badge>
+    ),
+  },
+  {
+    id: "actions",
+    header: "Actions",
+    cell: ({ row }) => {
+      const payroll = row.original;
+      return (
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleView(payroll)}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <RoleGuard
+            allowedRoles={[
+              UserRole.ADMIN,
+              UserRole.HR_MANAGER,
+              UserRole.ALL,
+            ]}
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleEdit(payroll)}
+            >
+              <Edit className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleDelete(payroll.id)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </RoleGuard>
+        </div>
+      );
+    },
+  },
+  {
+    id: "expand",
+    header: "",
+    cell: ({ row }) => {
+      const payroll = row.original;
+      const isOpen = expanded === payroll.id;
+      return (
+        <button
+          onClick={() => handleToggle(payroll.id)}
+          className="flex items-center justify-center"
+        >
+          {isOpen ? (
+            <ChevronDown className="h-4 w-4" />
+          ) : (
+            <ChevronRight className="h-4 w-4" />
+          )}
+        </button>
+      );
+    },
+  },
+];
+
+ const payrollAdjestmentColumn: ColumnDef<PayrollAdjustment>[] = [
+    {
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => (
+        <span className="capitalize">{row.original.type || "-"}</span>
+      ),
+    },
+    {
+      accessorKey: "direction",
+      header: "Direction",
+      cell: ({ row }) => (
+        <Badge
+          variant={
+            row.original.direction === "addition" ? "default" : "secondary"
+          }
+          className="uppercase"
+        >
+          {row.original.direction}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: "amount",
+      header: "Amount",
+      cell: ({ row }) => formatCurrency(row.original.amount ?? 0),
+    },
+    {
+      accessorKey: "reason",
+      header: "Reason",
+      cell: ({ row }) => row.original.reason || "-",
+    },
+    {
+      accessorKey: "effectiveDate",
+      header: "Effective Date",
+      cell: ({ row }) =>
+        row.original.effectiveDate
+          ? formatDate(row.original.effectiveDate)
+          : "-",
+    },
+    {
+      accessorKey: "isRecurring",
+      header: "Recurring",
+      cell: ({ row }) => (row.original.isRecurring ? "Yes" : "No"),
+    },
+    {
+      accessorKey: "approvalStatus",
+      header: "Approval Status",
+      cell: ({ row }) => {
+        const status = row.original.approvalStatus;
+        const variant =
+          status === "approved"
+            ? "default"
+            : status === "pending"
+            ? "secondary"
+            : "destructive";
+        return (
+          <Badge variant={variant} className="capitalize">
+            {status}
+          </Badge>
+        );
+      },
+    },
+    {
+      accessorKey: "approvedBy",
+      header: "Approved By",
+      cell: ({ row }) => row.original.approvedBy || "-",
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm">
+            <Eye className="h-4 w-4" />
+          </Button>
+          <RoleGuard
+            allowedRoles={[
+              UserRole.ADMIN,
+              UserRole.SUPER_ADMIN,
+              UserRole.HR_MANAGER,
+              UserRole.ALL,
+            ]}
+          >
+            <Button variant="ghost" size="sm">
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm">
+              <Trash className="h-4 w-4 text-destructive" />
+            </Button>
+          </RoleGuard>
+        </div>
+      ),
+    },
+  ];
+
+
+
+const renderAdjustmentsTable = (adjustments: PayrollAdjustment[] = [] , employeeId:string , payrollId:string) => {
+ 
 
   return (
-    <div className="space-y-6">
+    <div className="pl-10">
+      <TableWrapper<PayrollAdjustment>
+        columns={payrollAdjestmentColumn}
+        data={adjustments || []}
+        loading={false}
+        title="Payroll Adjustments"
+        rightHeaderContent={
+          <RoleGuard
+            allowedRoles={[
+              UserRole.ADMIN,
+              UserRole.SUPER_ADMIN,
+              UserRole.HR_MANAGER,
+              UserRole.ALL,
+            ]}
+          >
+            <Dialog
+              open={isAddAdjustmentModalOpen}
+              onOpenChange={setIsAddAdjustmentModalOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Adjustment
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add Payroll Adjustment</DialogTitle>
+                </DialogHeader>
+                <PayrollAdjustmentForm
+                  employeeId={employeeId}
+                  onSubmit={async (data) => {
+                    await addAdjustment({...data , payrollId});
+                    setIsAddAdjustmentModalOpen(false);
+                  }}
+                  onCancel={() => setIsAddAdjustmentModalOpen(false)}
+                  employees={employees}
+                  accounts={COAccounts}
+                  
+                />
+              </DialogContent>
+            </Dialog>
+          </RoleGuard>
+        }
+      />
+    </div>
+  );
+};
+
+
+const [selectedRun, setSelectedRun] = useState<PayrollRun | null>(null);
+const [viewOpen, setViewOpen] = useState(false);
+const [editOpen, setEditOpen] = useState(false);
+
+
+const payrollRunColumns: ColumnDef<PayrollRun>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <input
+        type="checkbox"
+        onChange={(e) => {
+          if (e.target.checked) {
+            const allIds = table
+              .getFilteredRowModel()
+              .rows.map((row) => row.original.id);
+            setSelectedRuns(allIds);
+          } else {
+            setSelectedRuns([]);
+          }
+        }}
+        checked={
+          selectedRuns.length === table.getFilteredRowModel().rows.length &&
+          table.getFilteredRowModel().rows.length > 0
+        }
+      />
+    ),
+    cell: ({ row }) => (
+      <input
+        type="checkbox"
+        checked={selectedRuns.includes(row.original.id)}
+        onChange={(e) => {
+          if (e.target.checked) {
+            setSelectedRuns([...selectedRuns, row.original.id]);
+          } else {
+            setSelectedRuns(
+              selectedRuns.filter((id) => id !== row.original.id)
+            );
+          }
+        }}
+      />
+    ),
+  },
+  {
+    accessorKey: "id",
+    header: "Run ID",
+    cell: ({ row }) => row.original.id,
+  },
+  {
+    accessorKey: "name",
+    header: "Run Name",
+    cell: ({ row }) => row.original.name,
+  },
+  {
+    accessorKey: "periodStart",
+    header: "Period",
+    cell: ({ row }) =>
+      `${formatDate(row.original.periodStart)} - ${formatDate(
+        row.original.periodEnd
+      )}`,
+  },
+  {
+    accessorKey: "payDate",
+    header: "Pay Date",
+    cell: ({ row }) => (row.original.payDate ? formatDate(row.original.payDate) : "-"),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <Badge
+        variant={
+          row.original.status === PayrollRunStatus.COMPLETED
+            ? "default"
+            : row.original.status === PayrollRunStatus.DRAFT
+            ? "secondary"
+            : "destructive"
+        }
+      >
+        {row.original.status}
+      </Badge>
+    ),
+  },
+  {
+    accessorKey: "totalGrossPay",
+    header: "Total Gross",
+    cell: ({ row }) => formatCurrency(row.original.totalGrossPay),
+  },
+  {
+    accessorKey: "totalNetPay",
+    header: "Total Net",
+    cell: ({ row }) => formatCurrency(row.original.totalNetPay),
+  },
+  {
+    accessorKey: "totalDeductions",
+    header: "Deductions",
+    cell: ({ row }) => formatCurrency(row.original.totalDeductions),
+  },
+  {
+    id: "actions",
+    header: "Actions",
+  cell: ({ row }) => {
+  const run = row.original;
+
+  // const handleApproveRun = (id: string , status) => {
+  //   // your approve logic here
+  // };
+
+  const handleCancelRun  =(id:string) => {
+
+  }
+
+  const handleEditRun = (run:PayrollRun) => {
+  setSelectedRun(run);
+  setEditOpen(true);
+  };
+
+  const handleDeleteRun = (id: string) => {
+    // your delete logic
+  };
+
+  const handleViewRun = (run:PayrollRun) => {
+    setSelectedRun(run);
+  setViewOpen(true);
+  };
+
+  return (
+    <div className="flex items-center space-x-2">
+      {/* 👁 View is always available */}
+  <Dialog open={viewOpen} onOpenChange={setViewOpen}>
+              <DialogTrigger asChild>
+                 <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleViewRun(run)}
+        className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+      >
+        <Eye className="h-4 w-4" />
+      </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle> Payroll run Detial</DialogTitle>
+                </DialogHeader>
+               {selectedRun && (
+      <PayrollRunDetail
+        run={selectedRun}
+        onBack={() => setViewOpen(false)}
+        onApprove={changePayrollRunStatus}
+        onCancel={handleCancelRun}
+      />
+    )}
+              </DialogContent>
+            </Dialog>
+
+      <RoleGuard allowedRoles={[UserRole.ADMIN, UserRole.HR_MANAGER, UserRole.ALL]}>
+        {/* 🟡 Edit only when DRAFT or PROCESSING */}
+        {(run.status === PayrollRunStatus.DRAFT || run.status === PayrollRunStatus.PROCESSING) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditRun(run)}
+            className="text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50"
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+        )}
+
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Edit Payroll Run</DialogTitle>
+    </DialogHeader>
+
+    {selectedRun && (
+      <PayrollRunForm
+        accounts={COAccounts}       // ✅ from your create
+        employees={employees}       // ✅ from your create
+        run={selectedRun}   // ✅ prefill the form
+        onSubmit={async (data) => {
+          await updatePayrollRun(selectedRun.id, data); // your update API call
+          setEditOpen(false);
+        }}
+        onCancel={() => setEditOpen(false)}
+      />
+    )}
+  </DialogContent>
+</Dialog>
+
+
+        {/* ✅ Approve only when COMPLETED */}
+        {run.status === PayrollRunStatus.COMPLETED && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => changePayrollRunStatus(run.id , {status:PayrollRunStatus.APPROVED})}
+            className="text-green-500 hover:text-green-700 hover:bg-green-50"
+          >
+            <Check className="h-4 w-4" />
+          </Button>
+        )}
+
+        {/* ❌ Delete only when DRAFT */}
+        {run.status === PayrollRunStatus.DRAFT && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleDeleteRun(run.id)}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        )}
+      </RoleGuard>
+    </div>
+  )
+}
+  },
+];
+
+
+const [isRunModalOpen,setIsRunModalOpen] = useState(false)
+
+const [isAdjustmentModalOpen,setIsAdjustmentModalOpen] = useState(false)
+
+  return (
+    
+
+      <div className="space-y-6">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="runs">Payroll Runs</TabsTrigger>
+          <TabsTrigger value="payrolls">Payrolls</TabsTrigger>
+          {/* <TabsTrigger value="adjustments">Adjustments</TabsTrigger> */}
+        </TabsList>
+
+        {/* ========== Payrolls Tab ========== */}
+        <TabsContent value="payrolls" className="space-y-4">
+           <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <SectionHeader
           title="Payroll Management"
@@ -233,7 +801,7 @@ export default function PayrollPage() {
                   employees={employees}
                   onSubmit={async (data) => {
                     await addPayroll(data);
-                    setIsAddModalOpen(false);
+                    // setIsAddModalOpen(false);
                   }}
                   onCancel={() => setIsAddModalOpen(false)}
                 />
@@ -305,211 +873,32 @@ export default function PayrollPage() {
 
           <div className="rounded-md border overflow-hidden">
             <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <input
-                        type="checkbox"
-                        checked={
-                          selectedPayrolls.length === sortedPayrolls.length &&
-                          sortedPayrolls.length > 0
-                        }
-                        onChange={handleSelectAll}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                      />
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort("id")}
-                    >
-                      Payroll ID
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort("employee")}
-                    >
-                      Employee
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort("payPeriodStart")}
-                    >
-                      Pay Period
-                    </TableHead>
-                    <TableHead>Gross Pay</TableHead>
-                    <TableHead>Taxes</TableHead>
-                    <TableHead>Net Pay</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-24">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
 
-                <TableBody>
-                  {isLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-12">
-                        <div className="flex flex-col items-center justify-center space-y-3">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                          <span className="text-gray-500">
-                            Loading payrolls...
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : sortedPayrolls.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-12">
-                        <div className="flex flex-col items-center space-y-4">
-                          <Trash2 className="h-16 w-16 text-gray-400" />
-                          <div className="space-y-2">
-                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                              No payrolls found
-                            </h3>
-                            <p className="text-gray-500">
-                              {searchTerm
-                                ? "Try adjusting your search criteria"
-                                : "Add your first payroll record"}
-                            </p>
-                          </div>
-                          {searchTerm && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleSearch("")}
-                            >
-                              Clear search
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    sortedPayrolls.map((payroll) => (
-                      <TableRow
-                        key={payroll.id}
-                        className={`transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 ${
-                          selectedPayrolls.includes(payroll.id)
-                            ? "bg-blue-50 dark:bg-blue-900/20"
-                            : ""
-                        }`}
-                      >
-                        <TableCell>
-                          <input
-                            type="checkbox"
-                            checked={selectedPayrolls.includes(payroll.id)}
-                            onChange={() => handleSelectPayroll(payroll.id)}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {payroll.id}
-                        </TableCell>
-                        <TableCell>
-                          {payroll.employee.firstName}{" "}
-                          {payroll.employee.lastName}
-                        </TableCell>
-                        <TableCell>
-                          {formatDate(payroll.payPeriodStart)} -{" "}
-                          {formatDate(payroll.payPeriodEnd)}
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(payroll.grossPay)}
-                        </TableCell>
-                        <TableCell>
-                          {formatCurrency(
-                            (Number(payroll.federalTax) || 0) +
-                              (Number(payroll.stateTax) || 0) +
-                              (Number(payroll.socialSecurityTax) || 0) +
-                              (Number(payroll.medicareTax) || 0)
-                          )}
-                        </TableCell>
-                        <TableCell>{formatCurrency(payroll.netPay)}</TableCell>
-                        <TableCell>
-                          <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              payroll.status === "paid"
-                                ? "bg-green-100 text-green-800"
-                                : payroll.status === "draft"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {payroll.status}
-                          </span>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center space-x-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleView(payroll)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <RoleGuard
-                              allowedRoles={[
-                                UserRole.ADMIN,
-                                UserRole.HR_MANAGER,
-                                UserRole.ALL,
-                              ]}
-                            >
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(payroll)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(payroll.id)}
-                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </RoleGuard>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+
+              <TableWrapper<Payroll>
+                columns={payrollColumns}
+                data={sortedPayrolls || []}
+                loading={isLoading}
+                title="Payroll List"
+                rowSubComponent={(payroll) =>
+                  expanded === payroll.id ? renderAdjustmentsTable(payroll.adjustments , payroll.employee.id , payroll.id) : null
+                }
+              />
+
             </div>
           </div>
-
-          {/* Pagination Info */}
-          {sortedPayrolls.length > 0 && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-6 pt-4 border-t border-gray-200">
-              <div className="text-sm text-gray-500">
-                Showing{" "}
-                <span className="font-medium">{sortedPayrolls.length}</span> of{" "}
-                <span className="font-medium">{payrolls.length}</span> payrolls
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm" disabled>
-                  Previous
-                </Button>
-                <Button variant="outline" size="sm" disabled>
-                  Next
-                </Button>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Payroll</DialogTitle>
           </DialogHeader>
           {selectedPayroll && (
             <PayrollForm
+            accounts={COAccounts}
+            employees={employees}
               payroll={selectedPayroll}
               onSubmit={async (data) => {
                 await updatePayroll(selectedPayroll.id, data);
@@ -524,7 +913,7 @@ export default function PayrollPage() {
             />
           )}
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
 
       <Dialog open={isDetailsModalOpen} onOpenChange={setIsDetailsModalOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -547,6 +936,110 @@ export default function PayrollPage() {
           )}
         </DialogContent>
       </Dialog>
+    </div>
+        </TabsContent>
+        {/* ========== Payroll Runs Tab ========== */}
+  <TabsContent value="runs" className="space-y-4">
+  <div className="flex justify-between items-center">
+    <SectionHeader
+      title="Payroll Runs"
+      subtitle="Manage payroll runs"
+    />
+    <Dialog open={isRunModalOpen} onOpenChange={setIsRunModalOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Create Run
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create Payroll Run</DialogTitle>
+        </DialogHeader>
+        <PayrollRunForm
+        accounts={COAccounts}
+        employees={employees}
+        existingPayrolls={payrolls ?? []}
+          onSubmit={async (data) => {
+            await addPayrollRun(data as CreatePayrollRunDto);
+            setIsRunModalOpen(false);
+          }}
+          onCancel={() => setIsRunModalOpen(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  </div>
+
+  {/* Runs List */}
+  <div className="rounded-md border overflow-hidden mt-4">
+    <div className="overflow-x-auto">
+      <TableWrapper<PayrollRun>
+        columns={payrollRunColumns}
+        data={payrollRuns || []}
+        loading={isLoading}
+        title="Payroll Runs"
+        // rowSubComponent={(run) =>
+        //   <RunDetails run={run} /> 
+        // }
+      />
+    </div>
+  </div>
+</TabsContent>
+
+
+        {/* ========== Adjustments Tab ========== */}
+      <TabsContent value="adjustments" className="space-y-4">
+  <SectionHeader
+    title="Payroll Adjustments"
+    subtitle="Manage payroll adjustments"
+  />
+
+  <div className="flex justify-between items-center">
+    <h2 className="text-xl font-semibold">Adjustments</h2>
+    <Dialog open={isAdjustmentModalOpen} onOpenChange={setIsAdjustmentModalOpen}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Adjustment
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create Payroll Adjustment</DialogTitle>
+        </DialogHeader>
+        <PayrollAdjustmentForm
+          // payrolls={payrolls} // select which payroll this adjustment belongs to
+          onSubmit={async (data) => {
+            await addAdjustment(data);
+            setIsAdjustmentModalOpen(false);
+          }}
+          accounts={COAccounts}
+          employees={employees}
+
+          onCancel={() => setIsAdjustmentModalOpen(false)}
+        />
+      </DialogContent>
+    </Dialog>
+  </div>
+
+  {/* Adjustments List */}
+  <div className="rounded-md border overflow-hidden mt-4">
+    <div className="overflow-x-auto">
+      <TableWrapper<PayrollAdjustment>
+        columns={payrollAdjestmentColumn}
+        data={adjustments || []}
+        loading={isLoading}
+        title="Payroll Adjustments"
+        // rowSubComponent={(adj) =>
+        //   <AdjustmentDetails adjustment={adj} onSettle={async () => await settleAdjustment(adj.id)} />
+        // }
+      />
+    </div>
+  </div>
+</TabsContent>
+
+      </Tabs>
+
     </div>
   );
 }

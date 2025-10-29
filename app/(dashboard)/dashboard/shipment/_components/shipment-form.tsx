@@ -145,7 +145,7 @@ export default function ShipmentForm({
   }, [orderId, selectedOrder, setValue]);
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {/* Shipment Details */}do
+      {/* Shipment Details */}
       <Card>
         <CardHeader>
           <CardTitle>Shipment Details</CardTitle>
