@@ -1,4 +1,6 @@
 import { BaseEntity, FilterOptions } from './common.type';
+import { PurchaseOrder } from './po.types';
+import { SalesOrder } from './sales-order.types';
 
 // Shipment Type Enum
 export enum ShipmentType {
@@ -41,8 +43,13 @@ export interface Shipment extends BaseEntity {
   trackingNumber: string;
   type: ShipmentType;
   status: ShipmentStatus;
+
+  /** Relations */
   orderId?: string;
   supplierId?: string;
+  customerId?: string;
+
+  /** Core shipping info */
   carrier: string;
   originAddress: Address;
   destinationAddress: Address;
@@ -51,13 +58,32 @@ export interface Shipment extends BaseEntity {
   actualDeliveryDate?: string;
   weight?: number;
   shippingCost?: number;
+
+  /** Container & vessel info */
   containerNumber?: string;
   vesselName?: string;
   portOfLoading?: string;
   portOfDischarge?: string;
+
+  /** Customs info */
   customsInfo?: CustomsInfo;
+
+  /** Domestic delivery–specific fields */
+  deliveryAgentName?: string;
+  deliveryAgentPhone?: string;
+  vehiclePlateNumber?: string;
+  deliveryProofUrl?: string; // signed receipt or photo
+  recipientName?: string;
+  recipientSignatureUrl?: string;
+  isPartialDelivery?: boolean;
+
+  /** Additional info */
   notes?: string;
+
+  /** Relations */
   customsDocuments?: CustomsDocument[];
+  purchaseOrders?: PurchaseOrder[];
+  salesOrders?: SalesOrder[];
 }
 
 // Form data for creating/updating a shipment
@@ -80,6 +106,46 @@ export interface ShipmentFormData {
   portOfLoading?: string;
   portOfDischarge?: string;
   customsInfo?: CustomsInfo;
+  notes?: string;
+}
+
+
+export interface CreateShipmentForm {
+  trackingNumber: string;
+  type?: ShipmentType;
+  status?: ShipmentStatus;
+
+  orderId?: string;
+  supplierId?: string;
+  customerId?: string;
+
+  carrier: string;
+  originAddress: Address;
+  destinationAddress: Address;
+
+  shippedDate?: Date;
+  estimatedDeliveryDate?: Date;
+  actualDeliveryDate?: Date;
+
+  weight?: number;
+  shippingCost?: number;
+
+  containerNumber?: string;
+  vesselName?: string;
+  portOfLoading?: string;
+  portOfDischarge?: string;
+
+  customsInfo?: CustomsInfo;
+
+  /** 🚚 Domestic delivery–specific fields */
+  deliveryAgentName?: string;
+  deliveryAgentPhone?: string;
+  vehiclePlateNumber?: string;
+  deliveryProofUrl?: string;
+  recipientName?: string;
+  recipientSignatureUrl?: string;
+
+  isPartialDelivery?: boolean;
   notes?: string;
 }
 
@@ -112,33 +178,6 @@ export enum CustomsDocumentStatus {
   EXPIRED = 'expired',
   CANCELLED = 'cancelled',
 }
-
-// export interface CustomsDocument extends BaseEntity {
-//   documentNumber: string;
-//   type: CustomsDocumentType;
-//   status: CustomsDocumentStatus;
-//   issuedDate: string;
-//   expiryDate?: string;
-//   issuingAuthority: string;
-//   issuingCountry: string;
-//   description?: string;
-//   declaredValue?: number | string;
-//   currency?: string;
-//   notes?: string;
-//   requiresApproval: boolean;
-//   shipmentId: string;
-//   // workflow
-//   approvedByUserInfo?: { firstName: string; lastName: string; email: string };
-//   approvedDate?: string;
-//   reviewedByUserInfo?: { firstName: string; lastName: string; email: string };
-//   reviewedDate?: string;
-//   reviewNotes?: string;
-//   rejectedByUserInfo?: { firstName: string; lastName: string; email: string };
-//   rejectedDate?: string;
-//   rejectionReason?: string;
-
-  
-// }
 
 export interface HSCodeInfo {
   hsCode: string;

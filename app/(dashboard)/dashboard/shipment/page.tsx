@@ -90,12 +90,34 @@ export default function ShipmentsPage() {
     () => axiosInstance.get(`sales-orders`).then((r) => r.data),
     false
   );
+
+    const {
+    data: purchaseOrders = [],
+    loading: purchaseOrdersLoading,
+    execute: fetchPurchaseOrders,
+  } = useAsync(
+    () => axiosInstance.get(`purchase-orders`).then((r) => r.data),
+    false
+  );
+
+     const {
+    data: customers = [],
+    loading: customersLoading,
+    execute: fetchCustomers,
+  } = useAsync(
+    () => axiosInstance.get(`customers`).then((r) => r.data),
+    false
+  );
+
+  
   useEffect(() => {
     if (tenantId) {
       fetchSuppliers();
       fetchBranchs();
       fetchdProducts();
       fetchSalesOrders();
+      fetchPurchaseOrders()
+      fetchCustomers()
     }
   }, [tenantId]);
 
@@ -383,9 +405,11 @@ export default function ShipmentsPage() {
                 </DialogHeader>
                 <ShipmentForm
                   products={products}
-                  suppliers={suppliers}
+                  // suppliers={suppliers}
                   branches={branchs}
-                  orders={salseOrders}
+                  salesOrders={salseOrders}
+                  purchaseOrders={purchaseOrders}
+                  // customers={customers}
                   onSubmit={async (data) => {
                     await addShipment(data as any);
                     setIsAddModalOpen(false);
@@ -449,11 +473,13 @@ export default function ShipmentsPage() {
               <DialogTitle>Edit Shipment</DialogTitle>
             </DialogHeader>
             <ShipmentForm
-              orders={salseOrders}
+              salesOrders={salseOrders}
+              purchaseOrders={purchaseOrders}
+              // customers={customers}
               shipment={selectedShipment}
               branches={branchs}
               products={products}
-              suppliers={suppliers}
+              // suppliers={suppliers}
               onSubmit={async (data) => {
                 await updateShipment(selectedShipment?.id ?? "", data as any);
                 setIsEditModalOpen(false);

@@ -20,7 +20,7 @@ export interface RFQItem {
   deletedAt?: string | null;
   createdByUser?: string | null;
   updatedBy?: string | null;
-  productName: string;
+  name: string;
   productId: string;
   quantity: number;
   expectedUnitCost?: number;

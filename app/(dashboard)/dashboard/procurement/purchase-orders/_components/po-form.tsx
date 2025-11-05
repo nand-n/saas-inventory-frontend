@@ -18,6 +18,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
 import { PurchaseOrder } from "@/types/po.types";
+import { formatCurrency } from "@/lib/utils";
 
 const schema = z.object({
   supplierId: z.string().uuid(),
@@ -295,11 +296,11 @@ export default function PurchaseOrderForm({
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span>
-                $
-                {new Intl.NumberFormat(undefined, {
+                
+                {formatCurrency(new Intl.NumberFormat(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(totalAmount)}
+                }).format(totalAmount))}
               </span>
             </div>
             <hr />
@@ -308,11 +309,11 @@ export default function PurchaseOrderForm({
             <div className="flex justify-between font-bold text-base">
               <span>Total</span>
               <span>
-                $
-                {new Intl.NumberFormat(undefined, {
+                
+                {formatCurrency(new Intl.NumberFormat(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
-                }).format(totalAmount)}
+                }).format(totalAmount))}
               </span>
             </div>
           </div>

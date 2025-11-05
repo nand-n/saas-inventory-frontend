@@ -18,6 +18,7 @@ import { useOpportunityStore } from "@/store/crm/useOpportunityStore";
 import { useCRMCustomerStore } from "@/store/crm/useCRMCustomerStore";
 import { Opportunity, OpportunityStatus } from "@/types/crm.types";
 import dayjs from "dayjs";
+import { formatCurrency } from "@/lib/utils";
 
 interface OpportunityListProps {
   onEdit: (opportunity: Opportunity) => void;
@@ -187,8 +188,8 @@ export default function OpportunityList({ onEdit }: OpportunityListProps) {
                     <TableCell>
                       {opportunity.estimatedValue ? (
                         <span className="flex items-center gap-1">
-                          <DollarSign className="h-4 w-4" />
-                          {opportunity.estimatedValue.toLocaleString()}
+                          {/* <DollarSign className="h-4 w-4" /> */}
+                          {formatCurrency(opportunity.estimatedValue)}
                         </span>
                       ) : (
                         "-"

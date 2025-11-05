@@ -19,6 +19,7 @@ import {
   FileText,
 } from "lucide-react";
 import { Department } from "@/types/department.types";
+import { formatCurrency } from "@/lib/utils";
 
 interface DepartmentDetailProps {
   department: Department;
@@ -33,13 +34,7 @@ const DepartmentDetail: React.FC<DepartmentDetailProps> = ({
   onOpenChange,
   onEdit,
 }) => {
-  const formatCurrency = (amount?: number) => {
-    if (!amount) return "Not specified";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(amount);
-  };
+ 
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
@@ -138,7 +133,7 @@ const DepartmentDetail: React.FC<DepartmentDetailProps> = ({
                   <label className="text-sm font-medium text-muted-foreground">
                     Budget
                   </label>
-                  <p className="text-sm">{formatCurrency(department.budget)}</p>
+                  <p className="text-sm">{formatCurrency(department?.budget ?? 0)}</p>
                 </div>
               </div>
             </CardContent>

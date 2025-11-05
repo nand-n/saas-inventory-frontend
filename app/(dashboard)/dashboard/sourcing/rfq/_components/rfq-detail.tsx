@@ -158,7 +158,7 @@ const RfqDetails: React.FC<RfqDetailsProps> = ({
               className="flex items-center justify-between border-b pb-2"
             >
               <div className="space-y-1">
-                <p className="font-medium">{item.productName}</p>
+                <p className="font-medium">{item.name}</p>
                 <p className="text-sm text-muted-foreground">
                   Quantity: {item.quantity} ×{" "}
                   {formatCurrency(Number(item.expectedUnitCost))}

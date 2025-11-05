@@ -13,6 +13,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  Selector,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -31,7 +32,7 @@ const schema = z.object({
     .array(
       z.object({
         productId: z.string().uuid(),
-        productName: z.string(),
+        name: z.string(),
         quantity: z.coerce.number().min(1),
         expectedUnitCost: z.coerce.number().min(0),
       })
@@ -122,7 +123,7 @@ export default function RfqForm({
     const rfqItems =
       selectedRFQ.items?.map((item) => ({
         productId: item.productId ?? "",
-        productName: item.productName ?? "",
+        name: item.name ?? "",
         quantity: Number(item.quantity) ?? 1,
         expectedUnitCost:
           typeof item.expectedUnitCost === "string"
@@ -142,7 +143,7 @@ export default function RfqForm({
       ...items,
       {
         productId: "",
-        productName: "",
+        name: "",
         quantity: 1,
         expectedUnitCost: 0,
       },
@@ -163,29 +164,22 @@ export default function RfqForm({
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="grid">
-            <Label>Select Supplier</Label>
-            <Controller
-              name="supplierId"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  key={field.value || "empty"}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Supplier" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map((s) => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
+           <Controller
+  name="supplierId"
+  control={control}
+  render={({ field }) => (
+    <Selector
+      value={field.value}
+      onValueChange={field.onChange}
+      options={suppliers.map((s) => ({
+        value: s.id,
+        label: s.name,
+      }))}
+      placeholder="Select Supplier"
+      label="Supplier"
+    />
+  )}
+/>
           </div>
 
           <Input label="Issued Date" type="date" {...register("issuedDate")} />
@@ -197,81 +191,101 @@ export default function RfqForm({
         <CardHeader>
           <CardTitle>Items</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {watch("items")?.map((field, index) => (
-            <div
-              key={index}
-              className="flex flex-col md:flex-row md:items-end md:gap-4"
-            >
-              <div className="flex-1 grid gap-1">
-                <Label className="my-1">Select Product</Label>
-                <Controller
-                  name={`items.${index}.productId`}
-                  control={control}
-                  render={({ field }) => (
-                    <Select
-                      key={field.value}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Product" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {filteredProducts.length > 0 ? (
-                          filteredProducts.map((p) => (
-                            <SelectItem key={p.id} value={p.id}>
-                              {p.name}
-                            </SelectItem>
-                          ))
-                        ) : (
-                          <div className="p-2 text-gray-500 text-sm">
-                            No products found
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
+                <CardContent className="space-y-4">
+  <div className="overflow-x-auto">
+    <table className="w-full border-collapse border  rounded-md">
+      <thead className="">
+        <tr className="text-left text-sm font-medium text-gray-700">
+          <th className="p-2 border ">#</th>
+          <th className="p-2 border ">Product</th>
+          <th className="p-2 border ">Quantity</th>
+          <th className="p-2 border ">Expected Unit Cost</th>
+          <th className="p-2 border  text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {watch("items")?.map((_, index) => (
+          <tr key={index} className="text-sm">
+            <td className="p-2 border border-mute text-gray-600">
+              {index + 1}
+            </td>
 
-              <div className="flex-1">
-                <Input
-                  label="Quantity"
-                  type="number"
-                  {...register(`items.${index}.quantity`, {
-                    valueAsNumber: true,
-                  })}
-                />
-              </div>
+            <td className="p-2 border ">
+              <Controller
+                name={`items.${index}.productId`}
+                
+                control={control}
+                render={({ field }) => (
+                  <Selector
+                  className="rounded-none"
+                    value={field.value}
+                    // onValueChange={field.onChange}
+                      onValueChange={(value) => {
+        field.onChange(value);
 
-              <div className="flex-1">
-                <Input
-                  label="Expected Unit Cost"
-                  type="number"
-                  step="0.01"
-                  {...register(`items.${index}.expectedUnitCost`, {
-                    valueAsNumber: true,
-                  })}
-                />
-              </div>
+        // Find selected product and update its name
+        const selectedProduct = filteredProducts.find((p) => p.id === value);
+        if (selectedProduct) {
+          setValue(`items.${index}.name`, selectedProduct.name);
+        }
+      }}
+                    options={
+                      filteredProducts.length > 0
+                        ? filteredProducts.map((p) => ({
+                            value: p.id,
+                            label: p.name,
+                          }))
+                        : []
+                    }
+                    placeholder={
+                      filteredProducts.length > 0
+                        ? "Select Product"
+                        : "No products found"
+                    }
+                  />
+                )}
+              />
+            </td>
 
-              <div className="md:ml-auto mt-2 md:mt-0">
-                <Button
-                  type="button"
-                  variant="destructive"
-                  onClick={() => removeItem(index)}
-                >
-                  <X />
-                </Button>
-              </div>
-            </div>
-          ))}
+            <td className="p-2 border ">
+              <Input
+                type="number"
+                {...register(`items.${index}.quantity`, {
+                  valueAsNumber: true,
+                })}
+              />
+            </td>
 
-          <Button type="button" variant="outline" onClick={appendItem}>
-            Add Item
-          </Button>
-        </CardContent>
+            <td className="p-2 border ">
+              <Input
+                type="number"
+                step="0.01"
+                {...register(`items.${index}.expectedUnitCost`, {
+                  valueAsNumber: true,
+                })}
+              />
+            </td>
+
+            <td className="p-2 border  text-center">
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                onClick={() => removeItem(index)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <Button type="button" variant="outline" onClick={appendItem}>
+    Add Item
+  </Button>
+</CardContent>
       </Card>
 
       <Card className="w-full ml-auto">

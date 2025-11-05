@@ -74,21 +74,32 @@ export const navigationItems: NavigationItem[] = [
     icon: CalendarRange,
   },
 
+     {
+    name: 'Sourcing',
+    icon: ShoppingCart,
+    children: [
+      {
+        name: 'Suppliers',
+        href: '/dashboard/sourcing/suppliers/',
+        icon: Building2,
+      },
+       {
+        name: 'RFIs',
+        href: '/dashboard/sourcing/rfi/',
+        icon: ClipboardList,
+      },
+      {
+        name: 'RFQs',
+        href: '/dashboard/sourcing/rfq/',
+        icon: ClipboardList,
+      },
+    ],
+  },
 
     {
     name: 'Procurement',
     icon: ShoppingCart,
     children: [
-      {
-        name: 'Suppliers',
-        href: '/dashboard/procurement/suppliers/',
-        icon: Building2,
-      },
-      {
-        name: 'RFQs',
-        href: '/dashboard/procurement/rfq/',
-        icon: ClipboardList,
-      },
       {
         name: 'Purchase Orders',
         href: '/dashboard/procurement/purchase-orders/',

@@ -21,6 +21,7 @@ import OpportunityList from "./_components/OpportunityList";
 import CustomerModal from "./_components/CustomerModal";
 import InteractionModal from "./_components/InteractionModal";
 import OpportunityModal from "./_components/OpportunityModal";
+import { formatCurrency } from "@/lib/utils";
 
 export default function CRMDashboard() {
   const [activeTab, setActiveTab] = useState("customers");
@@ -175,7 +176,7 @@ export default function CRMDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              ${totalValue.toLocaleString()}
+              {formatCurrency(totalValue)}
             </div>
             <p className="text-xs text-muted-foreground">
               Win rate: {winRate.toFixed(1)}%
