@@ -101,46 +101,46 @@ export default function PayrollForm({
   const selectedEmployeeId = watch("employeeId");
   const selectedEmployee = employees.find((e) => e.id === selectedEmployeeId);
 
-const adjustments = watch("adjustments");
+  const adjustments = watch("adjustments");
 
-useEffect(() => {
-  if (!adjustments || !Array.isArray(adjustments)) return;
+  useEffect(() => {
+    if (!adjustments || !Array.isArray(adjustments)) return;
 
-  const gross = Number(selectedEmployee?.salary) || 0;
-  const hoursWorked = selectedEmployee?.weeklyHours || 0;
+    const gross = Number(selectedEmployee?.salary) || 0;
+    const hoursWorked = selectedEmployee?.weeklyHours || 0;
 
-  // Helper to sum by type
-  const getTotalByType = (type: AdjustmentType) => {
-    return adjustments
-      .filter((adj) => adj.type === type)
-      .reduce((sum, adj) => sum + Number(adj.amount || 0), 0);
-  };
+    // Helper to sum by type
+    const getTotalByType = (type: AdjustmentType) => {
+      return adjustments
+        .filter((adj) => adj.type === type)
+        .reduce((sum, adj) => sum + Number(adj.amount || 0), 0);
+    };
 
-  // Calculate each adjustment type
-  const bonus = getTotalByType(AdjustmentType.BONUS);
-  const allowance = getTotalByType(AdjustmentType.ALLOWANCE);
-  const overtime = getTotalByType(AdjustmentType.OVERTIME);
-  const commission = getTotalByType(AdjustmentType.COMMISSION);
-  const reimbursement = getTotalByType(AdjustmentType.REIMBURSEMENT);
-  const tax = getTotalByType(AdjustmentType.TAX);
-  const fine = getTotalByType(AdjustmentType.FINE);
-  const loan = getTotalByType(AdjustmentType.LOAN);
-  const advance = getTotalByType(AdjustmentType.ADVANCE);
-  const other = getTotalByType(AdjustmentType.OTHER);
+    // Calculate each adjustment type
+    const bonus = getTotalByType(AdjustmentType.BONUS);
+    const allowance = getTotalByType(AdjustmentType.ALLOWANCE);
+    const overtime = getTotalByType(AdjustmentType.OVERTIME);
+    const commission = getTotalByType(AdjustmentType.COMMISSION);
+    const reimbursement = getTotalByType(AdjustmentType.REIMBURSEMENT);
+    const tax = getTotalByType(AdjustmentType.TAX);
+    const fine = getTotalByType(AdjustmentType.FINE);
+    const loan = getTotalByType(AdjustmentType.LOAN);
+    const advance = getTotalByType(AdjustmentType.ADVANCE);
+    const other = getTotalByType(AdjustmentType.OTHER);
 
-  // Additions and deductions
-  const totalAdditions =
-    bonus + allowance + overtime + commission + reimbursement + other;
-  const totalDeductions = tax + fine + loan + advance;
+    // Additions and deductions
+    const totalAdditions =
+      bonus + allowance + overtime + commission + reimbursement + other;
+    const totalDeductions = tax + fine + loan + advance;
 
-  const netPay = gross + totalAdditions - totalDeductions;
+    const netPay = gross + totalAdditions - totalDeductions;
 
-  // Set all computed values
-  setValue("grossPay", Number(gross.toFixed(2)));
-  setValue("hoursWorked", hoursWorked);
+    // Set all computed values
+    setValue("grossPay", Number(gross.toFixed(2)));
+    setValue("hoursWorked", hoursWorked);
 
-  setValue("netPay", Number(netPay.toFixed(2)));
-}, [adjustments, selectedEmployee, setValue]);
+    setValue("netPay", Number(netPay.toFixed(2)));
+  }, [adjustments, selectedEmployee, setValue]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -305,48 +305,48 @@ useEffect(() => {
               />
 
               {/* Account selects */}{/* Debit Account */}
-<Controller
-  name={`adjustments.${index}.debitAccountId` as const}
-  control={control}
-  render={({ field }) => (
-    <Selector
-      value={field.value}
-      onValueChange={field.onChange}
-      options={accounts
-        ?.filter((acc) => Number(acc.code) >= 1000 && Number(acc.code) < 6000) // Assets & Expenses
-        .map((acc) => ({
-          value: acc.id,
-          label: acc.name,
-        }))}
-      placeholder="Select Debit Account"
-      label="Debit Account *"
-      error={errors.adjustments?.[index]?.debitAccountId?.message}
-    />
-  )}
-/>
+              <Controller
+                name={`adjustments.${index}.debitAccountId` as const}
+                control={control}
+                render={({ field }) => (
+                  <Selector
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                    options={accounts
+                      ?.filter((acc) => Number(acc.code) >= 1000 && Number(acc.code) < 6000) // Assets & Expenses
+                      .map((acc) => ({
+                        value: acc.id,
+                        label: acc.name,
+                      }))}
+                    placeholder="Select Debit Account"
+                    label="Debit Account *"
+                    error={errors.adjustments?.[index]?.debitAccountId?.message}
+                  />
+                )}
+              />
 
-{/* Credit Account */}
-<Controller
-  name={`adjustments.${index}.creditAccountId` as const}
-  control={control}
-  render={({ field }) => (
-    <Selector
-      value={field.value}
-      onValueChange={field.onChange}
-      options={accounts
-        ?.filter((acc) => Number(acc.code) >= 2000 && Number(acc.code) < 4000) // Liabilities & Equity
-        .map((acc) => ({
-          value: acc.id,
-          label: acc.name,
-        }))}
-      placeholder="Select Credit Account"
-      label="Credit Account *"
-      error={errors.adjustments?.[index]?.creditAccountId?.message}
-    />
-  )}
-/>
+              {/* Credit Account */}
+              <Controller
+                name={`adjustments.${index}.creditAccountId` as const}
+                control={control}
+                render={({ field }) => (
+                  <Selector
+                    value={field.value || ""}
+                    onValueChange={field.onChange}
+                    options={accounts
+                      ?.filter((acc) => Number(acc.code) >= 2000 && Number(acc.code) < 4000) // Liabilities & Equity
+                      .map((acc) => ({
+                        value: acc.id,
+                        label: acc.name,
+                      }))}
+                    placeholder="Select Credit Account"
+                    label="Credit Account *"
+                    error={errors.adjustments?.[index]?.creditAccountId?.message}
+                  />
+                )}
+              />
 
-              
+
 
               <Button
                 type="button"

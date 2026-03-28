@@ -7,6 +7,8 @@ import {
   TrashIcon,
   PencilIcon,
   FunnelIcon,
+  Cog6ToothIcon,
+  ArrowsRightLeftIcon,
 } from "@heroicons/react/24/outline";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
@@ -38,7 +40,6 @@ import StockTransferModal from "./_components/modals/stock-transfer-modal";
 import StockAdjustmentModal from "./_components/modals/stock-adjestment-modal";
 import SummaryCards from "./_components/modals/summary-status";
 import InventoryAnalytics from "./_components/inventory-analytics";
-import QuickActions from "./_components/quick-actions";
 import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/lib/utils";
 
@@ -137,6 +138,8 @@ const InventoryPage = () => {
       axiosInstance.get("/accounting/chart-of-accounts").then((r) => r.data),
     true
   );
+
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     if (TenantId) {
@@ -275,29 +278,35 @@ const InventoryPage = () => {
     },
     {
       accessorKey: "quantity",
-      header: "Quantity",
+      header: "Stock Level",
       cell: ({ row }) => {
         const quantity = Number(row.getValue("quantity"));
         const reorderLevel = Number(row.original.reorder_level);
-        const isLowStock = quantity <= reorderLevel;
+        const isLowStock = quantity <= reorderLevel && quantity > 0;
         const isOutOfStock = quantity === 0;
 
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <span
-              className={`font-medium ${
-                isOutOfStock
-                  ? "text-red-600"
-                  : isLowStock
-                  ? "text-yellow-600"
-                  : "text-green-600"
-              }`}
+              className={`font-semibold text-sm ${isOutOfStock
+                ? "text-red-600 dark:text-red-400"
+                : isLowStock
+                  ? "text-yellow-600 dark:text-yellow-400"
+                  : "text-emerald-600 dark:text-emerald-400"
+                }`}
             >
-              {quantity}
+              {quantity} <span className="text-gray-400 font-normal text-xs">units</span>
             </span>
-            {isOutOfStock && <Badge variant="destructive">Out of Stock</Badge>}
-            {isLowStock && !isOutOfStock && (
-              <Badge variant="secondary">Low Stock</Badge>
+            {isOutOfStock && <Badge variant="destructive" className="shadow-sm">Out of Stock</Badge>}
+            {isLowStock && (
+              <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border-yellow-200">
+                Low Stock
+              </Badge>
+            )}
+            {!isOutOfStock && !isLowStock && (
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
+                Healthy
+              </Badge>
             )}
           </div>
         );
@@ -316,7 +325,7 @@ const InventoryPage = () => {
       accessorKey: "unit_cost",
       header: "Unit Cost",
       cell: ({ row }) => (
-        <div className="font-medium">
+        <div className="font-medium text-gray-500 dark:text-gray-400">
           {formatCurrency(parseFloat(row.getValue("unit_cost")))}
         </div>
       ),
@@ -415,12 +424,13 @@ const InventoryPage = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30"
                     onClick={() => {
                       setSelectedItem(item);
                       setIsStockAdjustmentModalOpen(true);
                     }}
                   >
-                    🛠️
+                    <Cog6ToothIcon className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Adjust Stock</TooltipContent>
@@ -433,12 +443,13 @@ const InventoryPage = () => {
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="hover:bg-purple-50 hover:text-purple-600 dark:hover:bg-purple-900/30"
                     onClick={() => {
                       setSelectedItem(item);
                       setIsStockTransferModalOpen(true);
                     }}
                   >
-                    🔁
+                    <ArrowsRightLeftIcon className="h-4 w-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Transfer Stock</TooltipContent>
@@ -551,29 +562,38 @@ const InventoryPage = () => {
       averagePrice:
         allItems.length > 0
           ? allItems.reduce(
-              (acc: number, item: any) => acc + Number(item.unit_price),
-              0
-            ) / allItems.length
+            (acc: number, item: any) => acc + Number(item.unit_price),
+            0
+          ) / allItems.length
           : 0,
     };
   }, [summaryData]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-6">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-white">
             Inventory Management
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-500 mt-2 text-lg">
             Manage your inventory items, track stock levels, and monitor
-            performance
+            performance.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button
-            className="gap-2"
+            variant={showFilters ? "secondary" : "outline"}
+            className="gap-2 shadow-sm rounded-full px-5 transition-all"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <FunnelIcon className="h-5 w-5" />
+            {showFilters ? "Hide Filters" : "Show Filters"}
+          </Button>
+          <Button
+            size="lg"
+            className="gap-2 shadow-sm rounded-full px-6"
             onClick={() => {
               setSelectedItem(null);
               setFormData({
@@ -607,130 +627,105 @@ const InventoryPage = () => {
         averagePrice={averagePrice}
       />
 
-      {/* Quick Actions */}
-      <QuickActions
-        onBulkExport={() => {
-          toast({
-            title: "Export",
-            description: "Export functionality coming soon",
-          });
-        }}
-        onBulkImport={() => {
-          toast({
-            title: "Import",
-            description: "Import functionality coming soon",
-          });
-        }}
-        onLowStockReport={() => {
-          setStatusFilter("low-stock");
-        }}
-        onInventoryAudit={() => {
-          toast({
-            title: "Audit",
-            description: "Inventory audit functionality coming soon",
-          });
-        }}
-        onRefresh={refresh}
-        lowStockCount={lowStockItems}
-        outOfStockCount={outOfStockItems}
-      />
 
       {/* Filters Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <FunnelIcon className="h-5 w-5" />
-            Filters & Search
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Search</label>
-              <Input
-                placeholder="Search items or SKU..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
-            </div>
+      {showFilters && (
+        <Card className="border-t-4 border-t-primary shadow-sm bg-gray-50/50 dark:bg-gray-800/50 animate-in fade-in slide-in-from-top-4 duration-300">
+          <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+            <CardTitle className="text-lg font-semibold flex items-center gap-2 text-gray-800 dark:text-gray-100">
+              <FunnelIcon className="h-5 w-5 text-primary" />
+              Filters & Search
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Search</label>
+                <Input
+                  placeholder="Search items or SKU..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="in-stock">In Stock</SelectItem>
-                  <SelectItem value="low-stock">Low Stock</SelectItem>
-                  <SelectItem value="out-of-stock">Out of Stock</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Status</label>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="in-stock">In Stock</SelectItem>
+                    <SelectItem value="low-stock">Low Stock</SelectItem>
+                    <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Category</label>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {inventoryCategories?.map(
-                    (category: { id: string; category_name: string }) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.category_name}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Category</label>
+                <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {inventoryCategories?.map(
+                      (category: { id: string; category_name: string }) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.category_name}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Branch</label>
+                <Select value={branchFilter} onValueChange={setBranchFilter}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="All Branches" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Branches</SelectItem>
+                    {branches?.map((branch: { id: string; name: string }) => (
+                      <SelectItem key={branch.id} value={branch.id}>
+                        {branch.name}
                       </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Branch</label>
-              <Select value={branchFilter} onValueChange={setBranchFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All Branches" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Branches</SelectItem>
-                  {branches?.map((branch: { id: string; name: string }) => (
-                    <SelectItem key={branch.id} value={branch.id}>
-                      {branch.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Items per page</label>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => setCurrentPage(1)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                    <SelectItem value="100">100</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Items per page</label>
-              <Select
-                value={itemsPerPage.toString()}
-                onValueChange={(value) => setCurrentPage(1)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                  <SelectItem value="100">100</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Branch Inventory Summary */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Branch Inventory Summary</CardTitle>
+      <Card className="shadow-sm">
+        <CardHeader className="pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+          <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100">Branch Inventory Summary</CardTitle>
         </CardHeader>
         <CardContent>
           {summaryLoading ? (
@@ -744,36 +739,39 @@ const InventoryPage = () => {
               {summaryData?.map((branch: any) => (
                 <div
                   key={branch.branch_id}
-                  className="p-4 border rounded-lg hover:shadow-md transition-shadow"
+                  className="p-5 bg-white dark:bg-gray-800/80 border border-gray-100 dark:border-gray-700/60 rounded-xl shadow-sm hover:shadow-md transition-all duration-200"
                 >
-                  <div className="font-medium text-lg mb-3">
-                    {branch.branch_name}
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Items:</span>
-                      <span className="font-medium">{branch.total_items}</span>
+                  <div className="flex items-center justify-between mb-4 border-b border-gray-50 dark:border-gray-700/50 pb-3">
+                    <div className="font-semibold text-gray-900 dark:text-gray-100 text-lg tracking-tight">
+                      {branch.branch_name}
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Quantity:</span>
-                      <span className="font-medium">
+                    <Badge variant="outline" className="bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-400 border-gray-200 dark:border-gray-700">Branch</Badge>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center group">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-700 transition-colors">Total Items</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">{branch.total_items}</span>
+                    </div>
+                    <div className="flex justify-between items-center group">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-700 transition-colors">Physical Quantity</span>
+                      <span className="font-semibold text-gray-900 dark:text-gray-100">
                         {branch.total_quantity}
                       </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Value:</span>
-                      <span className="font-medium">
+                    <div className="flex justify-between items-center group">
+                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400 group-hover:text-gray-700 transition-colors">Asset Value</span>
+                      <span className="font-bold text-primary">
                         {formatCurrency(Number(branch.total_value))}
                       </span>
                     </div>
-                    <div className="mt-3">
-                      <div className="flex justify-between text-sm mb-1">
-                        <span>Stock Level</span>
-                        <span>
+                    <div className="mt-5 pt-4 border-t border-gray-50 dark:border-gray-700/50">
+                      <div className="flex justify-between text-xs font-semibold mb-2 text-gray-600 dark:text-gray-300">
+                        <span>Capacity Usage</span>
+                        <span className="text-primary">
                           {Math.round(
                             (branch.total_quantity /
                               (branch.total_items * 10)) *
-                              100
+                            100
                           )}
                           %
                         </span>
@@ -781,9 +779,9 @@ const InventoryPage = () => {
                       <Progress
                         value={Math.round(
                           (branch.total_quantity / (branch.total_items * 10)) *
-                            100
+                          100
                         )}
-                        className="h-2"
+                        className="h-2 bg-gray-100 dark:bg-gray-700"
                       />
                     </div>
                   </div>
@@ -801,11 +799,13 @@ const InventoryPage = () => {
       />
 
       {/* Inventory Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Inventory Items</CardTitle>
-          <div className="text-sm text-muted-foreground">
-            Showing {filteredItems.length} of {totalItems} items
+      <Card className="shadow-sm overflow-hidden">
+        <CardHeader className="bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100">Inventory Items</CardTitle>
+            <Badge variant="secondary" className="px-3 py-1 font-medium">
+              Showing {filteredItems.length} of {totalItems} items
+            </Badge>
           </div>
         </CardHeader>
         <CardContent>

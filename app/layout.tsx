@@ -4,6 +4,7 @@ import "./globals.css";
 import { ToastProvider, ToastViewport } from "@/components/ui/toast";
 import AuthHydration from "@/store/hydration/AuthHydration";
 import { ThemeProvider } from "@/providers/theme-context";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,6 +43,7 @@ export default function RootLayout({
             {children}
             <ToastViewport />
           </ToastProvider>
+          <Toaster richColors position="top-right" />
         </ThemeProvider>
       </body>
     </html>

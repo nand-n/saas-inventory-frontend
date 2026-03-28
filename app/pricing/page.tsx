@@ -138,26 +138,26 @@ function PricingCards() {
 
   const [loading, setLoading] = useState(false)
   const [plans, setPlans] = useState<Plan[]>([])
-  useEffect(()=>{
-    const fetchSubscriptionPlans = async ()=>{
+  useEffect(() => {
+    const fetchSubscriptionPlans = async () => {
       setLoading(true)
       try {
         const response = await axiosInstance.get('/plans')
         setPlans(response.data)
       } catch (error) {
         console.log(error);
-      }finally{
+      } finally {
         setLoading(false)
       }
     }
     fetchSubscriptionPlans()
-  } ,[])
+  }, [])
   return (
     <div className="relative py-24">
       <Gradient className="absolute inset-x-2 top-48 bottom-0 rounded-4xl ring-1 ring-black/5 ring-inset" />
       <Container className="relative">
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {loading && [0,1,2].map((i) => (
+          {loading && [0, 1, 2].map((i) => (
             <div key={i} className="-m-2 grid grid-cols-1 rounded-4xl ring-1 shadow-[inset_0_0_2px_1px_#ffffff4d] ring-black/5 max-lg:mx-auto max-lg:w-full max-lg:max-w-md">
               <div className="grid grid-cols-1 rounded-4xl p-2 shadow-md shadow-black/5">
                 <div className="rounded-3xl bg-white p-10 pb-9 ring-1 shadow-2xl ring-black/5 h-[340px] animate-pulse" />
@@ -236,7 +236,7 @@ const PricingCard: FC<PricingCardProps> = ({ tier }) => {
         <div className="rounded-3xl bg-white p-10 pb-9 ring-1 shadow-2xl ring-black/5">
           <Subheading>{tier?.plan_name}</Subheading>
           <p className="mt-2 text-sm/6 text-gray-950/75">{tier.description}</p>
-          
+
           <div className="mt-8 flex items-center gap-4">
             <div className="text-5xl font-medium text-gray-950">
               {tier.current_price === 0 ? "Free" : `${tier?.currency ?? "USD"} ${tier.current_price}`}
@@ -497,7 +497,7 @@ function Testimonial() {
               <figcaption className="mt-auto">
                 <p className="text-sm/6 font-medium text-white">Tina Yards</p>
                 <p className="text-sm/6 font-medium">
-                  <span className="bg-linear-to-r from-[#fff1be] from-28% via-[#ee87cb] via-70% to-[#b060ff] bg-clip-text text-transparent">
+                  <span className=" text-white">
                     VP of Sales, Protocol
                   </span>
                 </p>

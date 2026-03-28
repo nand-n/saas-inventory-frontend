@@ -44,6 +44,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import useTenantStore from "@/store/tenant/tenantStore";
+import useAuthStore from "@/store/auth/auth.store";
 import useConfigurationStore from "@/store/tenant/configurationStore";
 import { useAsync } from "@/hooks/useAsync";
 import axiosInstance from "@/lib/axiosInstance";
@@ -148,7 +149,7 @@ function AccountDropdownMenu() {
 
 export function ApplicationLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const tenantID = "f99d3371-7406-4fa6-bd88-2ae24da29e5a";
+  const { tenantId: tenantID } = useAuthStore();
 
   const { data: configData } = useAsync(
     () =>
@@ -163,7 +164,7 @@ export function ApplicationLayout({ children }: { children: React.ReactNode }) {
 
   const currentPage =
     pathname.split("/")[1]?.charAt(0).toUpperCase() +
-      pathname.split("/")[1]?.slice(1) || "Dashboard";
+    pathname.split("/")[1]?.slice(1) || "Dashboard";
   const isActive = (path: string) => pathname === path;
   return (
     <SidebarLayout
@@ -237,11 +238,10 @@ export function ApplicationLayout({ children }: { children: React.ReactNode }) {
             <SidebarSection>
               {navItems.map(({ name, icon, path }) => (
                 <SidebarItem
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
-                    isActive(path ?? "")
-                      ? "bg-blue-100 text-blue-600 font-semibold"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${isActive(path ?? "")
+                    ? "bg-blue-100 text-blue-600 font-semibold"
+                    : "text-gray-700 hover:bg-gray-100"
+                    }`}
                   key={name}
                   href={path}
                   current={isActive(path ?? "")}

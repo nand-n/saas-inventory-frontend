@@ -87,21 +87,24 @@ const SummaryCards: React.FC<SummaryCardsProps> = ({
         return (
           <Card
             key={stat.title}
-            className={`hover:shadow-lg transition-all duration-200 border-l-4 ${stat.borderColor}`}
+            className="relative overflow-hidden hover:shadow-lg transition-all duration-300 border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm group"
           >
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">
+            {/* Left border accent line */}
+            <div className={`absolute top-0 left-0 w-1 h-full ${stat.bgColor.replace("bg-", "bg-").replace("100", "400").replace("900/30", "500")}`} />
+
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-5 pl-5">
+              <CardTitle className="text-sm font-semibold tracking-wide text-gray-500 dark:text-gray-400">
                 {stat.title}
               </CardTitle>
-              <div className={`p-2 rounded-lg ${stat.bgColor}`}>
-                <Icon className={`h-4 w-4 ${stat.color}`} />
+              <div className={`p-2.5 rounded-xl ${stat.bgColor} ring-1 ring-white/50 dark:ring-gray-800 transition-transform group-hover:scale-110 duration-300`}>
+                <Icon className={`h-5 w-5 ${stat.color}`} />
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pl-5 pb-5">
               {summaryLoading ? (
-                <div className="h-8 w-12 animate-pulse bg-gray-200 rounded" />
+                <div className="h-8 w-1/2 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md mt-1" />
               ) : (
-                <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                <div className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white mt-1">
                   {stat.value}
                 </div>
               )}

@@ -25,14 +25,13 @@ export const metadata: Metadata = {
 
 function Hero() {
   return (
-    <div className="relative">
-      <Gradient className="absolute inset-2 bottom-0 rounded-4xl ring-1 ring-black/5 ring-inset" />
+    <div className="relative bg-white">
       <Container className="relative">
         <Navbar
           banner={
             <Link
               href="/blog/radiant-raises-100m-series-a-from-tailwind-ventures"
-              className="flex items-center gap-1 rounded-full bg-fuchsia-950/35 px-3 py-0.5 text-sm/6 font-medium text-white data-hover:bg-fuchsia-950/30"
+              className="flex items-center gap-1 rounded-md bg-black px-3 py-0.5 text-sm/6 font-medium text-white data-hover:bg-fuchsia-950/30"
             >
               Topper , A B2B app in the mission to change the Indutry!
               <ChevronRightIcon className="size-4" />
@@ -43,7 +42,7 @@ function Hero() {
           <h1 className="font-display text-6xl/[0.9] font-medium tracking-tight text-balance text-gray-950 sm:text-8xl/[0.8] md:text-9xl/[0.8]">
             Close every deal.
           </h1>
-          <p className="mt-8 max-w-lg text-xl/7 font-medium text-gray-950/75 sm:text-2xl/8">
+          <p className="mt-8 max-w-lg text-xl/7 font-medium text-gray-600 sm:text-2xl/8">
             Topper helps you sell more by revealing sensitive information about
             your bussiness.
           </p>
@@ -193,13 +192,13 @@ function DarkBentoSection() {
 
 export default function Home() {
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden bg-white">
       <Hero />
       <main>
         <Container className="mt-10">
           <LogoCloud />
         </Container>
-        <div className="bg-linear-to-b from-white from-50% to-gray-100 py-32">
+        <div className="py-32">
           <FeatureSection />
           <BentoSection />
         </div>

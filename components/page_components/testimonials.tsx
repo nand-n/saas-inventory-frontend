@@ -142,7 +142,7 @@ function TestimonialCard({
         <figcaption className="mt-6 border-t border-white/20 pt-6">
           <p className="text-sm/6 font-medium text-white">{name}</p>
           <p className="text-sm/6 font-medium">
-            <span className="bg-linear-to-r from-[#fff1be] from-28% via-[#ee87cb] via-70% to-[#b060ff] bg-clip-text text-transparent">
+            <span className="text-white">
               {title}
             </span>
           </p>
@@ -162,7 +162,7 @@ function CallToAction() {
       <div className="mt-2">
         <Link
           href="#"
-          className="inline-flex items-center gap-2 text-sm/6 font-medium text-pink-600"
+          className="inline-flex items-center gap-2 text-sm/6 font-medium text-black"
         >
           Get started
           <ArrowLongRightIcon className="size-5" />

@@ -389,7 +389,7 @@ export default function SupplierForm({
                       {watch(`newProducts.${index}.sku`) && (
                         <div className="flex flex-col items-center md:items-end">
                           <QRCode
-                            value={watch(`newProducts.${index}.sku`)}
+                            value={watch(`newProducts.${index}.sku`) || ""}
                             size={128}
                             className="border p-2 rounded-md shadow-sm"
                           />

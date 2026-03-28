@@ -15,11 +15,20 @@ export function SheetProvider({ open, onOpenChange, children }: SheetProviderPro
   return <div data-open={open}>{children}</div>;
 }
 
-export function SheetContent({ children, side = "right", size = "default", className = "" }: any) {
-  return (
-    <div className={`fixed top-0 ${side === 'right' ? 'right-0' : 'left-0'} h-full w-full max-w-md bg-background shadow-lg ${className}`}>{children}</div>
-  );
+interface SheetContentProps {
+  children: React.ReactNode;
+  side?: "left" | "right" | "top" | "bottom";
+  size?: "default" | "sm" | "lg" | "xl" | "full";
+  className?: string;
 }
+
+export const SheetContent: React.FC<SheetContentProps> = ({ children, side = "right", size = "default", className = "" }) => {
+  return (
+    <div className={`fixed top-0 ${side === 'right' ? 'right-0' : 'left-0'} h-full w-full max-w-md bg-background shadow-lg transition-transform duration-300 z-[100] ${className}`}>
+      {children}
+    </div>
+  );
+};
 
 export function SheetHeader({ children }: { children: React.ReactNode }) {
   return <div className="p-4 border-b">{children}</div>;

@@ -1,10 +1,14 @@
 import { useRef } from "react";
 import { ConfigFormHandle, ConfigurationForm } from "../forms/ConfigurationForm";
+import useAuthStore from "@/store/auth/auth.store";
 
 export default function Configurations() {
-          const formRef = useRef<ConfigFormHandle>(null)
-    
-    return <div>
-          <ConfigurationForm tenantId="f99d3371-7406-4fa6-bd88-2ae24da29e5a" ref={formRef} />
-    </div>
+      const formRef = useRef<ConfigFormHandle>(null);
+      const { tenantId } = useAuthStore();
+
+      return (
+            <div>
+                  <ConfigurationForm tenantId={tenantId} ref={formRef} />
+            </div>
+      );
 }

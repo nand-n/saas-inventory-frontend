@@ -1,5 +1,5 @@
-// lib/axiosInstance.ts
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import { toast } from 'sonner';
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000',
@@ -14,7 +14,7 @@ if (typeof window !== 'undefined') {
         .split('; ')
         .find(row => row.startsWith('authToken='))
         ?.split('=')[1];
-      
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -33,6 +33,10 @@ if (typeof window !== 'undefined') {
         // Handle token expiration
         document.cookie = 'authToken=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         window.location.href = '/login';
+      } else {
+        // Show global error toast for other errors
+        const message = error.response?.data?.message || error.message || "An unexpected error occurred";
+        toast.error(message);
       }
       return Promise.reject(error);
     }

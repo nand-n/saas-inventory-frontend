@@ -260,7 +260,16 @@ export default function RfqPage() {
                 products={products}
                 suppliers={suppliers}
                 onSubmit={async (data) => {
-                  await addRfq(data);
+                  const d = {
+                    ...data,
+                    items: data.items.map((item) => ({
+                      ...item,
+                      productName:
+                        products.find((p: any) => p.id === item.productId)
+                          ?.name || "Unknown Product",
+                    })),
+                  };
+                  await addRfq(d);
                   setIsAddModalOpen(false);
                 }}
                 onCancel={() => setIsAddModalOpen(false)}
@@ -320,7 +329,16 @@ export default function RfqPage() {
             <RfqForm
               selectedRFQ={selectedRFQ}
               onSubmit={async (data) => {
-                await updateRfq(selectedRFQ?.id ?? "", data);
+                const d = {
+                  ...data,
+                  items: data.items.map((item) => ({
+                    ...item,
+                    productName:
+                      products.find((p: any) => p.id === item.productId)
+                        ?.name || "Unknown Product",
+                  })),
+                };
+                await updateRfq(selectedRFQ?.id ?? "", d);
                 setIsEditModalOpen(false);
                 fetchRfqs();
               }}

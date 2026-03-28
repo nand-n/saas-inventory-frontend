@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,6 +69,21 @@ export default function Login() {
   const { setTenant } = useTenantStore();
 
   const router = useRouter();
+
+  useEffect(() => {
+    const checkSetup = async () => {
+      try {
+        const response = await axiosInstance.get('/auth/setup-check');
+        if (response.data.needed) {
+          router.push('/superadmin/setup');
+        }
+      } catch (error) {
+        console.error('Failed to check setup status', error);
+      }
+    };
+    checkSetup();
+  }, [router]);
+
   const onSubmit = async (data: any) => {
     try {
       setIsSubmitting(true);
@@ -84,9 +99,8 @@ export default function Login() {
       setTenant(response.data.tenant);
 
       // Set cookie
-      document.cookie = `authToken=${response.data.token}; path=/; ${
-        data.rememberMe ? `max-age=${30 * 24 * 60 * 60}` : ""
-      }`;
+      document.cookie = `authToken=${response.data.token}; path=/; ${data.rememberMe ? `max-age=${30 * 24 * 60 * 60}` : ""
+        }`;
 
       showToast("Success", "Login successful!");
       router.push("/dashboard/overview");
